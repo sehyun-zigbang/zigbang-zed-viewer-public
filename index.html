@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <base href="/zigbang-zed-viewer-public/" />
     <title>PlayCanvas glTF Viewer</title>
     <meta name="description" content="Fast and lightweight glTF 2.0 scene viewer powered by the PlayCanvas WebGL engine">
     <meta name="keywords" content="glTF, GLB, WebGL, PlayCanvas, Viewer">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link rel="icon" type="image/png" href="./static/playcanvas-logo.png" />
-    <link rel="manifest" href="./static/manifest.json">
-    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <link rel="icon" type="image/png" href="https://sehyun-zigbang.github.io/zigbang-zed-viewer-public/static/playcanvas-logo.png" />
+    <link rel="manifest" href="https://sehyun-zigbang.github.io/zigbang-zed-viewer-public/static/manifest.json">
+    <link rel="stylesheet" href="https://sehyun-zigbang.github.io/zigbang-zed-viewer-public/style.css" />
+    <script type="text/javascript">
+        if (/playcanvas\.com/.test(window.top.location.host)) {
+            document.write('<link rel="stylesheet" href="https://sehyun-zigbang.github.io/zigbang-zed-viewer-public/fonts.css" />');
+        }
+    </script>
 </head>
 
 <body>
@@ -17,6 +21,18 @@
         <img />
     </a>
     <div id='app'></div>
-    <script src="./index.js"></script>
+    <script src="https://sehyun-zigbang.github.io/zigbang-zed-viewer-public/index.js"></script>
+    <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"  type="text/javascript" charset="UTF-8" data-domain-script="" ></script>
+    <script type="text/javascript">
+        if (!window._optanonCallbacks) {
+            window._optanonCallbacks = [];
+        }
+
+        function OptanonWrapper() {
+            for (var i = 0; i < _optanonCallbacks.length; i++) {
+                _optanonCallbacks[i]();
+            }
+        }
+    </script>
 </body>
 </html>
