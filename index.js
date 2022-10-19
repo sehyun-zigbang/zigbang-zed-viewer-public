@@ -137273,6 +137273,7 @@ var SmoothedValue = /** @class */ (function () {
         this.target.copy(value);
     };
     SmoothedValue.prototype.update = function (deltaTime) {
+        this.target.y = Math.min(-2, this.target.y);
         if (this.timer < this.transitionTime) {
             this.timer = Math.min(this.timer + deltaTime, this.transitionTime);
             var n = this.timer / this.transitionTime;
