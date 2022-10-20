@@ -133048,7 +133048,7 @@ var Viewer = /** @class */ (function () {
         });
         this.app = app;
         var assets = {
-            'bloom': new Asset('bloom', 'script', { url: '/static/effect/bloom.js' })
+            'bloom': new Asset('bloom', 'script', { url: getAssetPath('effect/bloom.js') })
         };
         var assetListLoader = new AssetListLoader(Object.values(assets), app.assets);
         assetListLoader.load(function () {
