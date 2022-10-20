@@ -137255,13 +137255,15 @@ var ReadDepth = /** @class */ (function () {
 }());
 
 var SmoothedValue = /** @class */ (function () {
-    function SmoothedValue(value, transitionTime) {
+    function SmoothedValue(value, transitionTime, type) {
         if (transitionTime === void 0) { transitionTime = 0.25; }
+        if (type === void 0) { type = 1; }
         this.value = value.clone();
         this.start = value.clone();
         this.target = value.clone();
         this.transitionTime = transitionTime;
         this.timer = 0;
+        this.type = type;
     }
     SmoothedValue.prototype.goto = function (target) {
         this.timer = 0;
@@ -137271,9 +137273,24 @@ var SmoothedValue = /** @class */ (function () {
     SmoothedValue.prototype.snapto = function (value) {
         this.timer = this.transitionTime;
         this.target.copy(value);
+        this.snaptoPoint = value;
     };
     SmoothedValue.prototype.update = function (deltaTime) {
-        this.target.y = Math.min(-2, this.target.y);
+        if (this.bounds != null) {
+            if (this.type == 1) {
+                var offset = -50;
+                var x = this.bounds.halfExtents.x + offset;
+                this.target.x = Math.max(Math.min(x, this.target.x), -x);
+                this.target.y = this.snaptoPoint.y;
+                var z = this.bounds.halfExtents.z + offset;
+                this.target.z = Math.max(Math.min(z, this.target.z), -z);
+            }
+            else
+                (this.type == 2);
+            {
+                this.target.y = Math.min(-2, this.target.y);
+            }
+        }
         if (this.timer < this.transitionTime) {
             this.timer = Math.min(this.timer + deltaTime, this.transitionTime);
             var n = this.timer / this.transitionTime;
@@ -137287,6 +137304,9 @@ var SmoothedValue = /** @class */ (function () {
             this.value.copy(this.target);
         }
     };
+    SmoothedValue.prototype.setBounds = function (bounds) {
+        this.bounds = bounds;
+    };
     return SmoothedValue;
 }());
 var vec = new Vec3();
@@ -137296,8 +137316,8 @@ var worldDiff = new Vec3();
 var OrbitCamera = /** @class */ (function () {
     function OrbitCamera(cameraNode, transitionTime) {
         this.cameraNode = cameraNode;
-        this.focalPoint = new SmoothedValue(new Vec3(0, 0, 0), transitionTime);
-        this.azimElevDistance = new SmoothedValue(new Vec3(0, 0, 10000), transitionTime);
+        this.focalPoint = new SmoothedValue(new Vec3(0, 0, 0), transitionTime, 1);
+        this.azimElevDistance = new SmoothedValue(new Vec3(0, 0, 10000), transitionTime, 2);
     }
     OrbitCamera.prototype.vecToAzimElevDistance = function (vec, azimElevDistance) {
         var distance = vec.length();
@@ -137325,6 +137345,11 @@ var OrbitCamera = /** @class */ (function () {
         vec.add(this.focalPoint.value);
         this.cameraNode.setLocalPosition(vec);
         this.cameraNode.setLocalEulerAngles(aed.y, aed.x, 0);
+    };
+    OrbitCamera.prototype.setBounds = function (bounds) {
+        this.sceneBounds = bounds;
+        this.focalPoint.setBounds(bounds);
+        this.azimElevDistance.setBounds(bounds);
     };
     return OrbitCamera;
 }());
@@ -138287,6 +138312,7 @@ var Viewer = /** @class */ (function () {
             aed.z = distance;
             this.orbitCamera.azimElevDistance.snapto(aed);
         }
+        this.orbitCamera.setBounds(bbox);
         this.orbitCamera.focalPoint.snapto(bbox.center);
         camera.nearClip = distance / 100;
         camera.farClip = distance * 10;
