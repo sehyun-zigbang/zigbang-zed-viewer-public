@@ -129394,6 +129394,23 @@ var VinettePanel = /** @class */ (function (_super) {
     };
     return VinettePanel;
 }(React.Component));
+var DOFPanel = /** @class */ (function (_super) {
+    __extends(DOFPanel, _super);
+    function DOFPanel() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DOFPanel.prototype.shouldComponentUpdate = function (nextProps) {
+        return JSON.stringify(nextProps.scripts) !== JSON.stringify(this.props.scripts);
+    };
+    DOFPanel.prototype.render = function () {
+        var props = this.props;
+        return (React.createElement(Panel$1, { headerText: 'DOF', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
+            React.createElement(Toggle, { label: 'Enable', value: props.scripts.bokeh.enabled, setProperty: function (value) { return props.setProperty('scripts.bokeh.enabled', value); } }),
+            React.createElement(Slider, { label: 'MaxBlur', precision: 2, min: 0, max: 0.1, value: props.scripts.bokeh.maxBlur, setProperty: function (value) { return props.setProperty('scripts.bokeh.maxBlur', value); } }),
+            React.createElement(Slider, { label: 'Aperture', precision: 2, min: 0, max: 0.2, value: props.scripts.bokeh.aperture, setProperty: function (value) { return props.setProperty('scripts.bokeh.aperture', value); } })));
+    };
+    return DOFPanel;
+}(React.Component));
 var ShowPanel = /** @class */ (function (_super) {
     __extends(ShowPanel, _super);
     function ShowPanel() {
@@ -129454,6 +129471,7 @@ var LeftPanel = /** @class */ (function (_super) {
                 React.createElement(SubLightingPanel, { setProperty: this.props.setProperty, lightingData: this.props.observerData.lighting, uiData: this.props.observerData.ui }),
                 React.createElement(ColorAdjustPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(BloomPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
+                React.createElement(DOFPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(VinettePanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(ShowPanel, { setProperty: this.props.setProperty, showData: this.props.observerData.show, uiData: this.props.observerData.ui }))));
     };
@@ -133091,6 +133109,7 @@ var Viewer = /** @class */ (function () {
             'bloom': new Asset('bloom', 'script', { url: getAssetPath('effect/bloom.js') }),
             'brightnesscontrast': new Asset('brightnesscontrast', 'script', { url: getAssetPath('effect/brightnesscontrast.js') }),
             'huesaturation': new Asset('huesaturation', 'script', { url: getAssetPath('effect/huesaturation.js') }),
+            'bokeh': new Asset('bokeh', 'script', { url: getAssetPath('effect/bokeh.js') }),
             'vignette': new Asset('vignette', 'script', { url: getAssetPath('effect/vignette.js') })
         };
         var assetListLoader = new AssetListLoader(Object.values(assets), app.assets);
@@ -133323,6 +133342,11 @@ var Viewer = /** @class */ (function () {
             'scripts.huesaturation.enabled': this.setHueSaturationEnabled.bind(this),
             'scripts.huesaturation.hue': this.setHue.bind(this),
             'scripts.huesaturation.saturation': this.setSaturation.bind(this),
+            // dof
+            'scripts.bokeh.enabled': this.setBokehEnabled.bind(this),
+            'scripts.bokeh.maxBlur': this.setBokehMaxBlur.bind(this),
+            'scripts.bokeh.aperture': this.setBokehAperture.bind(this),
+            'scripts.bokeh.focus': this.setBokehFocus.bind(this),
             // vignette
             'scripts.vignette.enabled': this.setVignetteEnabled.bind(this),
             'scripts.vignette.offset': this.setVignetteOffset.bind(this),
@@ -134310,6 +134334,28 @@ var Viewer = /** @class */ (function () {
         }
         this.renderNextFrame();
     };
+    Viewer.prototype.setBokehEnabled = function (value) {
+        this.setBokehApply();
+    };
+    Viewer.prototype.setBokehMaxBlur = function (value) {
+        this.setBokehApply();
+    };
+    Viewer.prototype.setBokehAperture = function (value) {
+        this.setBokehApply();
+    };
+    Viewer.prototype.setBokehFocus = function (value) {
+        this.setBokehApply();
+    };
+    Viewer.prototype.setBokehApply = function () {
+        var enabled = this.observer.get('scripts.bokeh.enabled');
+        this.camera.script.destroy('bokeh');
+        if (enabled) {
+            this.camera.script.create('bokeh', {
+                attributes: this.observer.get('scripts.bokeh')
+            });
+        }
+        this.renderNextFrame();
+    };
     //#endregion
     //#region Util
     // extract query params. taken from https://stackoverflow.com/a/21152762
@@ -134447,6 +134493,12 @@ var observerData = {
             bloomIntensity: 0.7,
             bloomThreshold: 0.5,
             blurAmount: 15
+        },
+        bokeh: {
+            enabled: true,
+            maxBlur: 0.02,
+            aperture: 0.15,
+            focus: 1,
         },
         ssao: {
             enabled: true,
