@@ -8619,7 +8619,7 @@ void main(void) {
 }
 `;
 
-var packDepthPS$1 = `
+var packDepthPS = `
 // Packing a float in GLSL with multiplication and mod
 // http://blog.gradientstudios.com/2012/08/23/shadow-map-improvement
 vec4 packFloat(float depth) {
@@ -11437,7 +11437,7 @@ const shaderChunks = {
   outputAlphaOpaquePS,
   outputAlphaPremulPS,
   outputTex2DPS,
-  packDepthPS: packDepthPS$1,
+  packDepthPS,
   sheenPS,
   sheenGlossPS,
   parallaxPS,
@@ -13158,7 +13158,7 @@ const rotation = new Quat();
 const invParentRot = new Quat();
 const matrix = new Mat4();
 const target = new Vec3();
-const up$1 = new Vec3();
+const up = new Vec3();
 
 class GraphNode extends EventHandler {
   constructor(name = 'Untitled') {
@@ -13837,18 +13837,18 @@ class GraphNode extends EventHandler {
       target.copy(x);
 
       if (y instanceof Vec3) {
-        up$1.copy(y);
+        up.copy(y);
       } else {
-        up$1.copy(Vec3.UP);
+        up.copy(Vec3.UP);
       }
     } else if (z === undefined) {
       return;
     } else {
       target.set(x, y, z);
-      up$1.set(ux, uy, uz);
+      up.set(ux, uy, uz);
     }
 
-    matrix.setLookAt(this.getPosition(), target, up$1);
+    matrix.setLookAt(this.getPosition(), target, up);
     rotation.setFromMat4(matrix);
     this.setRotation(rotation);
   }
@@ -58081,7 +58081,7 @@ class AnimationComponentSystem extends ComponentSystem {
 
 Component._buildAccessors(AnimationComponent.prototype, _schema$l);
 
-const v2$1 = new Vec2();
+const v2 = new Vec2();
 const v3 = new Vec3();
 const v4 = new Vec4();
 const c = new Color();
@@ -58105,9 +58105,9 @@ class AnimComponentBinder extends DefaultAnimBinder {
   }
 
   static _packVec2(values) {
-    v2$1.x = values[0];
-    v2$1.y = values[1];
-    return v2$1;
+    v2.x = values[0];
+    v2.y = values[1];
+    return v2;
   }
 
   static _packVec3(values) {
@@ -129249,11 +129249,7 @@ var CameraPanel = /** @class */ (function (_super) {
         var props = this.props;
         return (React.createElement(Panel$1, { headerText: 'CAMERA', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
             React.createElement(Slider, { label: 'Fov', precision: 0, min: 35, max: 150, value: props.observerData.show.fov, setProperty: function (value) { return props.setProperty('show.fov', value); } }),
-            React.createElement(Select, { label: 'Tonemap', type: 'string', options: ['Linear', 'Filmic', 'Hejl', 'ACES'].map(function (v) { return ({ v: v, t: v }); }), value: props.observerData.lighting.tonemapping, setProperty: function (value) { return props.setProperty('lighting.tonemapping', value); } }),
-            React.createElement(Select, { label: 'Pixel Scale', value: props.observerData.render.pixelScale, type: 'number', options: [1, 2, 4, 8, 16].map(function (v) { return ({ v: v, t: Number(v).toString() }); }), setProperty: function (value) { return props.setProperty('render.pixelScale', value); } }),
-            React.createElement(Toggle, { label: 'Multisample', value: props.observerData.render.multisample, enabled: props.observerData.render.multisampleSupported, setProperty: function (value) { return props.setProperty('render.multisample', value); } }),
-            React.createElement(Toggle, { label: 'High Quality', value: props.observerData.render.hq, enabled: !props.observerData.show.stats, setProperty: function (value) { return props.setProperty('render.hq', value); } }),
-            React.createElement(Toggle, { label: 'Stats', value: props.observerData.show.stats, setProperty: function (value) { return props.setProperty('show.stats', value); } })));
+            React.createElement(Select, { label: 'Tonemap', type: 'string', options: ['Linear', 'Filmic', 'Hejl', 'ACES'].map(function (v) { return ({ v: v, t: v }); }), value: props.observerData.lighting.tonemapping, setProperty: function (value) { return props.setProperty('lighting.tonemapping', value); } })));
     };
     return CameraPanel;
 }(React.Component));
@@ -129417,17 +129413,12 @@ var ShowPanel = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     ShowPanel.prototype.shouldComponentUpdate = function (nextProps) {
-        return JSON.stringify(nextProps.showData) !== JSON.stringify(this.props.showData) || JSON.stringify(nextProps.uiData) !== JSON.stringify(this.props.uiData);
+        return JSON.stringify(nextProps.showData) !== JSON.stringify(this.props.showData);
     };
     ShowPanel.prototype.render = function () {
         var props = this.props;
         return (React.createElement(Panel$1, { headerText: 'DEBUG', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
-            React.createElement(Toggle, { label: 'Grid', value: props.showData.grid, setProperty: function (value) { return props.setProperty('show.grid', value); } }),
-            React.createElement(Toggle, { label: 'Wireframe', value: props.showData.wireframe, setProperty: function (value) { return props.setProperty('show.wireframe', value); } }),
-            React.createElement(Toggle, { label: 'Axes', value: props.showData.axes, setProperty: function (value) { return props.setProperty('show.axes', value); } }),
-            React.createElement(Toggle, { label: 'Skeleton', value: props.showData.skeleton, setProperty: function (value) { return props.setProperty('show.skeleton', value); } }),
-            React.createElement(Toggle, { label: 'Bounds', value: props.showData.bounds, setProperty: function (value) { return props.setProperty('show.bounds', value); } }),
-            React.createElement(Slider, { label: 'Normals', precision: 2, min: 0, max: 1, setProperty: function (value) { return props.setProperty('show.normals', value); }, value: props.showData.normals })));
+            React.createElement(Toggle, { label: 'Stats', value: props.showData.stats, setProperty: function (value) { return props.setProperty('show.stats', value); } })));
     };
     return ShowPanel;
 }(React.Component));
@@ -129473,7 +129464,7 @@ var LeftPanel = /** @class */ (function (_super) {
                 React.createElement(BloomPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(DOFPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(VinettePanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
-                React.createElement(ShowPanel, { setProperty: this.props.setProperty, showData: this.props.observerData.show, uiData: this.props.observerData.ui }))));
+                React.createElement(ShowPanel, { setProperty: this.props.setProperty, showData: this.props.observerData.show }))));
     };
     return LeftPanel;
 }(React.Component));
@@ -132455,353 +132446,6 @@ var DropHandler = /** @class */ (function () {
     return DropHandler;
 }());
 
-var debugLayerFront = null;
-var debugLayerBack = null;
-var v0 = new Vec3();
-var v1 = new Vec3();
-var v2 = new Vec3();
-var up = new Vec3(0, 1, 0);
-var mat = new Mat4();
-var unitBone = [
-    [[0, 0, 0], [-0.5, 0, 0.3]],
-    [[0, 0, 0], [0.5, 0, 0.3]],
-    [[0, 0, 0], [0, -0.5, 0.3]],
-    [[0, 0, 0], [0, 0.5, 0.3]],
-    [[0, 0, 1], [-0.5, 0, 0.3]],
-    [[0, 0, 1], [0.5, 0, 0.3]],
-    [[0, 0, 1], [0, -0.5, 0.3]],
-    [[0, 0, 1], [0, 0.5, 0.3]],
-    [[0, -0.5, 0.3], [0.5, 0, 0.3]],
-    [[0.5, 0, 0.3], [0, 0.5, 0.3]],
-    [[0, 0.5, 0.3], [-0.5, 0, 0.3]],
-    [[-0.5, 0, 0.3], [0, -0.5, 0.3]]
-];
-var vshader$1 = "\nattribute vec3 vertex_position;\nattribute vec4 vertex_color;\n\nvarying vec4 vColor;\n\nuniform mat4 matrix_model;\nuniform mat4 matrix_viewProjection;\n\nvoid main(void) {\n    gl_Position = matrix_viewProjection * matrix_model * vec4(vertex_position, 1.0);\n    vColor = vertex_color;\n}";
-var fshader$1 = "\nprecision highp float;\n\nvarying vec4 vColor;\n\nuniform vec4 uColor;\n\nvoid main(void) {\n    gl_FragColor = vColor * uColor;\n}";
-var linesShaderDefinition = {
-    attributes: {
-        vertex_position: SEMANTIC_POSITION,
-        vertex_color: SEMANTIC_COLOR
-    },
-    vshader: vshader$1,
-    fshader: fshader$1
-};
-var DebugLines = /** @class */ (function () {
-    function DebugLines(app, camera, backLayer) {
-        if (backLayer === void 0) { backLayer = true; }
-        var device = app.graphicsDevice;
-        if (!debugLayerFront) {
-            // construct the debug layer
-            debugLayerBack = new Layer({
-                enabled: true,
-                name: 'Debug Layer Behind',
-                opaqueSortMode: SORTMODE_NONE,
-                transparentSortMode: SORTMODE_NONE,
-                passThrough: true,
-                overrideClear: true,
-                onDrawCall: function (drawCall, index) {
-                    device.setDepthFunc(FUNC_GREATER);
-                }
-            });
-            debugLayerFront = new Layer({
-                enabled: true,
-                name: 'Debug Layer',
-                opaqueSortMode: SORTMODE_NONE,
-                transparentSortMode: SORTMODE_NONE,
-                passThrough: true,
-                overrideClear: true
-            });
-            app.scene.layers.pushTransparent(debugLayerBack);
-            app.scene.layers.pushTransparent(debugLayerFront);
-            camera.camera.layers = camera.camera.layers.concat([debugLayerBack.id, debugLayerFront.id]);
-        }
-        var vertexFormat = new VertexFormat(device, [
-            { semantic: SEMANTIC_POSITION, components: 3, type: TYPE_FLOAT32 },
-            { semantic: SEMANTIC_COLOR, components: 4, type: TYPE_UINT8, normalize: true }
-        ]);
-        // construct the mesh
-        var mesh = new Mesh();
-        mesh.vertexBuffer = new VertexBuffer(device, vertexFormat, 8192, BUFFER_DYNAMIC);
-        mesh.primitive[0].type = PRIMITIVE_LINES;
-        mesh.primitive[0].base = 0;
-        mesh.primitive[0].indexed = false;
-        mesh.primitive[0].count = 0;
-        var frontMaterial = new Material();
-        frontMaterial.shader = new Shader(device, linesShaderDefinition);
-        frontMaterial.setParameter('uColor', [1, 1, 1, 0.7]);
-        frontMaterial.blendType = BLEND_NORMAL;
-        frontMaterial.update();
-        var frontInstance = new MeshInstance(mesh, frontMaterial, new GraphNode());
-        frontInstance.cull = false;
-        frontInstance.visible = false;
-        debugLayerFront.addMeshInstances([frontInstance], true);
-        this.meshInstances = [frontInstance];
-        // construct back
-        if (backLayer) {
-            var backMaterial = new Material();
-            backMaterial.shader = new Shader(device, linesShaderDefinition);
-            backMaterial.setParameter('uColor', [0.5, 0.5, 0.5, 0.5]);
-            backMaterial.blendType = BLEND_NORMAL;
-            backMaterial.depthTest = true;
-            backMaterial.depthWrite = false;
-            backMaterial.update();
-            var backInstance = new MeshInstance(mesh, backMaterial, new GraphNode());
-            backInstance.cull = false;
-            backInstance.visible = false;
-            debugLayerBack.addMeshInstances([backInstance], true);
-            this.meshInstances.push(backInstance);
-        }
-        this.app = app;
-        this.mesh = mesh;
-        this.vertexFormat = vertexFormat;
-        this.vertexCursor = 0;
-        this.vertexData = new Float32Array(this.mesh.vertexBuffer.lock());
-        this.colorData = new Uint32Array(this.mesh.vertexBuffer.lock());
-    }
-    DebugLines.matrixMad = function (result, mat, factor) {
-        if (factor > 0) {
-            for (var i = 0; i < 16; ++i) {
-                result.data[i] += mat.data[i] * factor;
-            }
-        }
-    };
-    DebugLines.prototype.clear = function () {
-        this.vertexCursor = 0;
-    };
-    DebugLines.prototype.box = function (min, max) {
-        this.line(new Vec3(min.x, min.y, min.z), new Vec3(max.x, min.y, min.z));
-        this.line(new Vec3(max.x, min.y, min.z), new Vec3(max.x, min.y, max.z));
-        this.line(new Vec3(max.x, min.y, max.z), new Vec3(min.x, min.y, max.z));
-        this.line(new Vec3(min.x, min.y, max.z), new Vec3(min.x, min.y, min.z));
-        this.line(new Vec3(min.x, max.y, min.z), new Vec3(max.x, max.y, min.z));
-        this.line(new Vec3(max.x, max.y, min.z), new Vec3(max.x, max.y, max.z));
-        this.line(new Vec3(max.x, max.y, max.z), new Vec3(min.x, max.y, max.z));
-        this.line(new Vec3(min.x, max.y, max.z), new Vec3(min.x, max.y, min.z));
-        this.line(new Vec3(min.x, min.y, min.z), new Vec3(min.x, max.y, min.z));
-        this.line(new Vec3(max.x, min.y, min.z), new Vec3(max.x, max.y, min.z));
-        this.line(new Vec3(max.x, min.y, max.z), new Vec3(max.x, max.y, max.z));
-        this.line(new Vec3(min.x, min.y, max.z), new Vec3(min.x, max.y, max.z));
-    };
-    DebugLines.prototype.line = function (v0, v1, clr) {
-        if (clr === void 0) { clr = 0xffffffff; }
-        if (this.vertexCursor >= this.vertexData.length / 8) {
-            var oldVBuffer = this.mesh.vertexBuffer;
-            var byteSize = oldVBuffer.lock().byteLength * 2;
-            var arrayBuffer = new ArrayBuffer(byteSize);
-            this.mesh.vertexBuffer = new VertexBuffer(this.app.graphicsDevice, oldVBuffer.getFormat(), oldVBuffer.getNumVertices() * 2, BUFFER_DYNAMIC, arrayBuffer);
-            this.vertexData = new Float32Array(arrayBuffer);
-            this.colorData = new Uint32Array(arrayBuffer);
-            this.colorData.set(new Uint32Array(oldVBuffer.lock()));
-        }
-        var vertex = this.vertexCursor;
-        var vertexData = this.vertexData;
-        var colorData = this.colorData;
-        vertexData[vertex * 8 + 0] = v0.x;
-        vertexData[vertex * 8 + 1] = v0.y;
-        vertexData[vertex * 8 + 2] = v0.z;
-        colorData[vertex * 8 + 3] = clr;
-        vertexData[vertex * 8 + 4] = v1.x;
-        vertexData[vertex * 8 + 5] = v1.y;
-        vertexData[vertex * 8 + 6] = v1.z;
-        colorData[vertex * 8 + 7] = clr;
-        this.vertexCursor++;
-    };
-    DebugLines.prototype.generateNormals = function (vertexBuffer, worldMat, length, skinMatrices) {
-        var it = new VertexIterator(vertexBuffer);
-        var positions = it.element[SEMANTIC_POSITION];
-        var normals = it.element[SEMANTIC_NORMAL];
-        var blendIndices = it.element[SEMANTIC_BLENDINDICES];
-        var blendWeights = it.element[SEMANTIC_BLENDWEIGHT];
-        var numVertices = vertexBuffer.getNumVertices();
-        var p0 = new Vec3();
-        var p1 = new Vec3();
-        var skinMat = new Mat4();
-        for (var i = 0; i < numVertices; ++i) {
-            // get local/morphed positions and normals
-            p0.set(positions.get(0), positions.get(1), positions.get(2));
-            p1.set(normals.get(0), normals.get(1), normals.get(2));
-            if (blendIndices && blendWeights && skinMatrices) {
-                // transform by skinning matrices
-                skinMat.copy(Mat4.ZERO);
-                for (var j = 0; j < 4; ++j) {
-                    DebugLines.matrixMad(skinMat, skinMatrices[blendIndices.get(j)], blendWeights.get(j));
-                }
-                skinMat.mul2(worldMat, skinMat);
-                skinMat.transformPoint(p0, p0);
-                skinMat.transformVector(p1, p1);
-            }
-            else {
-                worldMat.transformPoint(p0, p0);
-                worldMat.transformVector(p1, p1);
-            }
-            p1.normalize().mulScalar(length).add(p0);
-            this.line(p0, p1);
-            it.next();
-        }
-    };
-    // render a bone originating at p0 and ending at p1
-    DebugLines.prototype.bone = function (p0, p1, clr) {
-        var _this = this;
-        if (clr === void 0) { clr = 0xffffffff; }
-        mat.setLookAt(p0, p1, up);
-        v0.sub2(p1, p0);
-        var len = v0.length();
-        var transform = function (v, va) {
-            v0.set(va[0] * len * 0.3, va[1] * len * 0.3, va[2] * -len);
-            mat.transformPoint(v0, v);
-        };
-        unitBone.forEach(function (line) {
-            transform(v1, line[0]);
-            transform(v2, line[1]);
-            _this.line(v1, v2, clr);
-        });
-    };
-    // render a colored axis at the given matrix orientation and size
-    DebugLines.prototype.axis = function (m, size) {
-        if (size === void 0) { size = 1; }
-        m.getTranslation(v0);
-        m.getScale(v2);
-        // ignore matrix scale
-        v2.set(size / v2.x, size / v2.y, size / v2.z);
-        m.getX(v1).mul(v2).add(v0);
-        this.line(v0, v1, 0xffff0000);
-        m.getY(v1).mul(v2).add(v0);
-        this.line(v0, v1, 0xff00ff00);
-        m.getZ(v1).mul(v2).add(v0);
-        this.line(v0, v1, 0xff0000ff);
-    };
-    // generate skeleton
-    DebugLines.prototype.generateSkeleton = function (node, showBones, showAxes, selectedNode) {
-        var _this = this;
-        var recurse = function (curr, selected) {
-            if (curr.enabled) {
-                selected || (selected = curr === selectedNode);
-                // render child links
-                for (var i = 0; i < curr.children.length; ++i) {
-                    var child = curr.children[i];
-                    if (showBones) {
-                        _this.bone(curr.getPosition(), child.getPosition(), selected ? 0xffffff00 : 0xffffffff);
-                    }
-                    recurse(child, selected);
-                }
-                // render axis
-                if (showAxes) {
-                    var parent_1 = node.parent;
-                    if (parent_1) {
-                        v0.sub2(curr.getPosition(), parent_1.getPosition());
-                        _this.axis(curr.getWorldTransform(), v0.length() * 0.05);
-                    }
-                }
-            }
-        };
-        recurse(node, false);
-    };
-    DebugLines.prototype.update = function () {
-        var empty = this.vertexCursor === 0;
-        if (!empty) {
-            this.meshInstances.forEach(function (m) {
-                m.visible = true;
-            });
-            this.mesh.vertexBuffer.unlock();
-            this.mesh.primitive[0].count = this.vertexCursor * 2;
-            this.vertexCursor = 0;
-        }
-        else {
-            this.meshInstances.forEach(function (m) {
-                m.visible = false;
-            });
-        }
-    };
-    return DebugLines;
-}());
-
-// @ts-ignore
-var packDepthPS = shaderChunks.packDepthPS;
-var vshader = "\nattribute vec2 vertex_position;\nvarying vec2 texcoord;\nvoid main(void) {\n    gl_Position = vec4(vertex_position, 0.5, 1.0);\n    texcoord = vertex_position.xy * 0.5 + 0.5; // + texcoordOffset;\n}\n";
-var fshader = "\nvarying vec2 texcoord;\nuniform sampler2D depthTex;\nuniform vec4 texcoordRange;\n".concat(packDepthPS, "\nvoid main(void) {\n    vec2 t = mix(texcoordRange.xy, texcoordRange.zw, texcoord);\n    gl_FragColor = packFloat(texture2D(depthTex, t).x);\n}\n");
-var vertexShaderHeader = function (device) {
-    // @ts-ignore
-    return device.webgl2 ? "#version 300 es\n\n".concat(shaderChunks.gles3VS, "\n") : '';
-};
-var fragmentShaderHeader = function (device) {
-    // @ts-ignore
-    return (device.webgl2 ? "#version 300 es\n\n".concat(shaderChunks.gles3PS, "\n") : '') +
-        "precision ".concat(device.precision, " float;\n\n");
-};
-// helper class for reading out the depth values from depth render targets.
-var ReadDepth = /** @class */ (function () {
-    function ReadDepth(device) {
-        var _this = this;
-        this.pixels = new Uint8Array(4);
-        this.texture = null;
-        this.renderTarget = null;
-        this.device = device;
-        this.shader = new Shader(device, {
-            attributes: {
-                vertex_position: SEMANTIC_POSITION
-            },
-            vshader: vertexShaderHeader(device) + vshader,
-            fshader: fragmentShaderHeader(device) + fshader
-        });
-        this.depthTexUniform = device.scope.resolve('depthTex');
-        this.texcoordRangeUniform = device.scope.resolve('texcoordRange');
-        var handler = function () {
-            _this.destroy();
-        };
-        device.once('destroy', handler);
-        device.on('devicelost', handler);
-    }
-    ReadDepth.prototype.destroy = function () {
-        if (this.renderTarget) {
-            this.renderTarget.destroy();
-            this.renderTarget = null;
-        }
-        if (this.texture) {
-            this.texture.destroy();
-            this.texture = null;
-        }
-    };
-    ReadDepth.prototype.create = function () {
-        this.texture = new Texture(this.device, {
-            width: 1,
-            height: 1,
-            format: PIXELFORMAT_R8_G8_B8_A8,
-            mipmaps: false,
-            minFilter: FILTER_NEAREST,
-            magFilter: FILTER_NEAREST
-        });
-        this.renderTarget = new RenderTarget({
-            colorBuffer: this.texture,
-            depth: false
-        });
-    };
-    ReadDepth.prototype.read = function (depthTexture, x, y) {
-        if (!this.texture) {
-            this.create();
-        }
-        var device = this.device;
-        var tx = x + 0.5 / depthTexture.width;
-        var ty = y + 0.5 / depthTexture.height;
-        this.depthTexUniform.setValue(depthTexture);
-        this.texcoordRangeUniform.setValue([tx, ty, tx, ty]);
-        drawQuadWithShader(this.device, this.renderTarget, this.shader);
-        var gl = device.gl;
-        var oldRt = device.renderTarget;
-        device.setRenderTarget(this.renderTarget);
-        device.updateBegin();
-        gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, this.pixels);
-        device.updateEnd();
-        device.setRenderTarget(oldRt);
-        device.updateBegin();
-        // unpackFloat
-        return this.pixels[0] / (255 * 256 * 256 * 256) +
-            this.pixels[1] / (255 * 256 * 256) +
-            this.pixels[2] / (255 * 256) +
-            this.pixels[3] / (255);
-    };
-    return ReadDepth;
-}());
-
 var SmoothedValue = /** @class */ (function () {
     function SmoothedValue(value, transitionTime, type) {
         if (transitionTime === void 0) { transitionTime = 0.25; }
@@ -132836,7 +132480,8 @@ var SmoothedValue = /** @class */ (function () {
             else
                 (this.type == 2);
             {
-                this.target.y = Math.min(-2, this.target.y);
+                //this.target = pc.Vec3.ZERO;
+                this.target.y = Math.min(0, this.target.y);
             }
         }
         if (this.timer < this.transitionTime) {
@@ -132888,6 +132533,8 @@ var OrbitCamera = /** @class */ (function () {
         this.focalPoint.update(deltaTime);
         this.azimElevDistance.update(deltaTime);
         var aed = this.azimElevDistance.value;
+        //console.log(this.focalPoint.value)
+        //console.log(aed);
         this.calcForwardVec(vec);
         vec.mulScalar(aed.z);
         vec.add(this.focalPoint.value);
@@ -133081,17 +132728,34 @@ var OrbitCameraInputTouch = /** @class */ (function () {
 }());
 
 // model filename extensions
-var modelExtensions = ['.gltf', '.glb', '.vox'];
+var modelExtensions = ['.gltf', '.glb'];
 var defaultSceneBounds = new BoundingBox(new Vec3(0, 1, 0), new Vec3(1, 1, 1));
 var Viewer = /** @class */ (function () {
     function Viewer(canvas, observer) {
         var _this = this;
-        this.multiframeBusy = false;
-        this.readDepth = null;
-        this.cursorWorld = new Vec3();
         this.loadTimestamp = null;
+        this.canvas = canvas;
+        this.observer = observer;
+        this.init_app();
+        var app = this.app;
+        this.init_camera();
+        this.init_light();
+        this.init_skyBox();
+        this.init_dropHandler();
+        this.init_object();
+        this.init_stats();
+        this.observer.on('canvasResized', function () {
+            _this.resizeCanvas();
+        });
+        this.resizeCanvas();
+        app.start();
+    }
+    //-----------------------------------
+    //#region App
+    Viewer.prototype.init_app = function () {
+        var canvas = this.canvas;
         // create the application
-        var app = new Application(canvas, {
+        this.app = new Application(canvas, {
             mouse: new Mouse(canvas),
             touch: new TouchDevice(canvas),
             graphicsDeviceOptions: {
@@ -133101,10 +132765,30 @@ var Viewer = /** @class */ (function () {
                 // and would only result in extra memory usage.
                 antialias: true,
                 depth: true,
-                preserveDrawingBuffer: true
+                //preserveDrawingBuffer: true
             }
         });
-        this.app = app;
+    };
+    Viewer.prototype.init_camera = function () {
+        var _this = this;
+        var app = this.app;
+        var observer = this.observer;
+        // Create Camera Entity
+        var camera = this.camera = new Entity("Camera");
+        camera.addComponent("camera", {
+            fov: 45,
+            frustumCulling: true,
+            clearColor: new Color(0, 0, 0, 0)
+        });
+        //camera.camera.requestSceneColorMap(true);
+        // Create OrbitCamera Component
+        this.orbitCamera = new OrbitCamera(camera, 0.25);
+        this.orbitCameraInputMouse = new OrbitCameraInputMouse(app, this.orbitCamera);
+        this.orbitCameraInputTouch = new OrbitCameraInputTouch(app, this.orbitCamera);
+        this.orbitCamera.focalPoint.snapto(new Vec3(0, 1, 0));
+        // Add 
+        this.app.root.addChild(camera);
+        // Create Post-Process Component
         var assets = {
             'bloom': new Asset('bloom', 'script', { url: getAssetPath('effect/bloom.js') }),
             'brightnesscontrast': new Asset('brightnesscontrast', 'script', { url: getAssetPath('effect/brightnesscontrast.js') }),
@@ -133114,203 +132798,173 @@ var Viewer = /** @class */ (function () {
         };
         var assetListLoader = new AssetListLoader(Object.values(assets), app.assets);
         assetListLoader.load(function () {
-            // monkeypatch the mouse and touch input devices to ignore touch events
-            // when they don't originate from the canvas.
-            var origMouseHandler = app.mouse._moveHandler;
-            app.mouse.detach();
-            app.mouse._moveHandler = function (event) {
-                if (event.target === canvas) {
-                    origMouseHandler(event);
-                }
-            };
-            app.mouse.attach(canvas);
-            var origTouchHandler = app.touch._moveHandler;
-            app.touch.detach();
-            app.touch._moveHandler = function (event) {
-                if (event.target === canvas) {
-                    origTouchHandler(event);
-                }
-            };
-            app.touch.attach(canvas);
-            // @ts-ignore
-            var multisampleSupported = app.graphicsDevice.maxSamples > 1;
-            observer.set('render.multisampleSupported', multisampleSupported);
-            observer.set('render.multisample', multisampleSupported && observer.get('render.multisample'));
-            // create drop handler
-            _this.dropHandler = new DropHandler(function (files, resetScene) {
-                _this.loadFiles(files, resetScene);
-                if (resetScene) {
-                    _this.observer.set('glbUrl', '');
-                }
-            });
-            // Set the canvas to fill the window and automatically change resolution to be the same as the canvas size
-            var canvasSize = _this.getCanvasSize();
-            app.setCanvasFillMode(FILLMODE_NONE, canvasSize.width, canvasSize.height);
-            app.setCanvasResolution(RESOLUTION_AUTO);
-            window.addEventListener("resize", function () {
-                _this.resizeCanvas();
-            });
-            // Depth layer is where the framebuffer is copied to a texture to be used in the following layers.
-            // Move the depth layer to take place after World and Skydome layers, to capture both of them.
-            // const depthLayer = app.scene.layers.getLayerById(pc.LAYERID_DEPTH);
-            // app.scene.layers.remove(depthLayer);
-            // app.scene.layers.insertOpaque(depthLayer, 2);
-            // create the orbit camera
-            var camera = new Entity("Camera");
-            camera.addComponent("camera", {
-                fov: 45,
-                frustumCulling: true,
-                clearColor: new Color(0, 0, 0, 0)
-            });
-            camera.camera.requestSceneColorMap(true);
             camera.addComponent("script");
             Object.keys(observer.get('scripts')).forEach(function (key) {
                 camera.script.create(key, {
                     attributes: observer.get("scripts.".concat(key))
                 });
             });
-            _this.orbitCamera = new OrbitCamera(camera, 0.25);
-            _this.orbitCameraInputMouse = new OrbitCameraInputMouse(_this.app, _this.orbitCamera);
-            _this.orbitCameraInputTouch = new OrbitCameraInputTouch(_this.app, _this.orbitCamera);
-            _this.orbitCamera.focalPoint.snapto(new Vec3(0, 1, 0));
-            app.root.addChild(camera);
-            // 라이트 수정 가능
-            // create the light
-            var light = new Entity();
-            var lightColor = new Color(1, 1, 1);
-            var intensity = 1;
-            var rotation = new Vec3(45, 30, 0);
-            light.addComponent("light", {
-                type: "directional",
-                color: lightColor,
-                castShadows: true,
-                intensity: intensity,
-                shadowBias: 0.2,
-                shadowDistance: 5,
-                normalOffsetBias: 0.05,
-                shadowResolution: 2048
+            var controlEvents = {
+                // bloom
+                'scripts.bloom.enabled': _this.setBloomEnabled.bind(_this),
+                'scripts.bloom.bloomIntensity': _this.setBloomIntensity.bind(_this),
+                'scripts.bloom.bloomThreshold': _this.setBloomThreshold.bind(_this),
+                'scripts.bloom.blurAmount': _this.setBlurAmount.bind(_this),
+                // color adjust
+                'scripts.brightnesscontrast.enabled': _this.setBrightnessContrastEnabled.bind(_this),
+                'scripts.brightnesscontrast.brightness': _this.setBrightness.bind(_this),
+                'scripts.brightnesscontrast.contrast': _this.setContrast.bind(_this),
+                'scripts.huesaturation.enabled': _this.setHueSaturationEnabled.bind(_this),
+                'scripts.huesaturation.hue': _this.setHue.bind(_this),
+                'scripts.huesaturation.saturation': _this.setSaturation.bind(_this),
+                // dof
+                'scripts.bokeh.enabled': _this.setBokehEnabled.bind(_this),
+                'scripts.bokeh.maxBlur': _this.setBokehMaxBlur.bind(_this),
+                'scripts.bokeh.aperture': _this.setBokehAperture.bind(_this),
+                'scripts.bokeh.focus': _this.setBokehFocus.bind(_this),
+                // vignette
+                'scripts.vignette.enabled': _this.setVignetteEnabled.bind(_this),
+                'scripts.vignette.offset': _this.setVignetteOffset.bind(_this),
+                'scripts.vignette.darkness': _this.setVignetteDarkness.bind(_this),
+            };
+            // register control events
+            Object.keys(controlEvents).forEach(function (e) {
+                observer.on("".concat(e, ":set"), controlEvents[e]);
+                observer.set(e, observer.get(e), false, false, true);
             });
-            light.setLocalEulerAngles(rotation);
-            app.root.addChild(light);
-            var sublight = new Entity();
-            sublight.addComponent("light", {
-                type: "directional",
-                color: lightColor,
-                castShadows: false,
-                intensity: intensity
-            });
-            sublight.setLocalEulerAngles(rotation);
-            app.root.addChild(sublight);
-            // disable autorender
-            app.autoRender = false;
-            _this.prevCameraMat = new Mat4();
-            app.on('update', _this.update, _this);
-            app.on('prerender', _this.onPrerender, _this);
-            app.on('postrender', _this.onPostrender, _this);
-            app.on('frameend', _this.onFrameend, _this);
-            // create the scene and debug root nodes
-            var sceneRoot = new Entity("sceneRoot", app);
-            app.root.addChild(sceneRoot);
-            var debugRoot = new Entity("debugRoot", app);
-            app.root.addChild(debugRoot);
-            // store app things
-            _this.camera = camera;
-            _this.cameraFocusBBox = null;
-            _this.cameraPosition = null;
-            _this.light = light;
-            _this.sublight = sublight;
-            _this.sceneRoot = sceneRoot;
-            _this.debugRoot = debugRoot;
-            _this.entities = [];
-            _this.entityAssets = [];
-            _this.assets = [];
-            _this.meshInstances = [];
-            _this.firstFrame = false;
-            _this.skyboxLoaded = false;
-            _this.showWireframe = observer.get('show.wireframe');
-            _this.showBounds = observer.get('show.bounds');
-            _this.showSkeleton = observer.get('show.skeleton');
-            _this.showAxes = observer.get('show.axes');
-            _this.normalLength = observer.get('show.normals');
-            _this.setTonemapping(observer.get('lighting.tonemapping'));
-            _this.setBackgroundColor(observer.get('lighting.env.backgroundColor'));
-            _this.dirtyWireframe = false;
-            _this.dirtyBounds = false;
-            _this.dirtySkeleton = false;
-            _this.dirtyGrid = false;
-            _this.dirtyNormals = false;
-            _this.sceneBounds = null;
-            _this.debugBounds = new DebugLines(app, camera);
-            _this.debugSkeleton = new DebugLines(app, camera);
-            _this.debugGrid = new DebugLines(app, camera, false);
-            _this.debugNormals = new DebugLines(app, camera, false);
-            // construct ministats, default off
-            _this.miniStats = new playcanvasExtras.exports.MiniStats(app);
-            _this.miniStats.enabled = observer.get('show.stats');
-            _this.observer = observer;
-            var device = _this.app.graphicsDevice;
-            // multiframe
-            //this.multiframe = new Multiframe(device, this.camera.camera, 5);
-            // initialize control events
-            _this.bindControlEvents();
-            _this.resizeCanvas();
-            // construct the depth reader
-            _this.readDepth = new ReadDepth(device);
-            _this.cursorWorld = new Vec3();
-            // double click handler
-            // canvas.addEventListener('dblclick', (event) => {
-            //     const camera = this.camera.camera;
-            //     const x = event.offsetX / canvas.clientWidth;
-            //     const y = 1.0 - event.offsetY / canvas.clientHeight;
-            //     // read depth
-            //     const depth = this.readDepth.read(camera.renderTarget.depthBuffer, x, y);
-            //     if (depth < 1) {
-            //         const pos = new pc.Vec4(x, y, depth, 1.0).mulScalar(2.0).subScalar(1.0);            // clip space
-            //         camera.projectionMatrix.clone().invert().transformVec4(pos, pos);                   // homogeneous view space
-            //         pos.mulScalar(1.0 / pos.w);                                                         // perform perspective divide
-            //         this.cursorWorld.set(pos.x, pos.y, pos.z);
-            //         this.camera.getWorldTransform().transformPoint(this.cursorWorld, this.cursorWorld); // world space
-            //         // move camera towards focal point
-            //         this.orbitCamera.focalPoint.goto(this.cursorWorld);
-            //     }
-            // });
-            // // start the application
-            app.start();
         });
-    }
-    // construct the controls interface and initialize controls
-    Viewer.prototype.bindControlEvents = function () {
-        var _this = this;
+        // store app things
+        this.cameraFocusBBox = null;
+        this.cameraPosition = null;
         var controlEvents = {
-            'render.multisample': this.resizeCanvas.bind(this),
-            'render.hq': function (enabled) {
-                //this.multiframe.enabled = enabled;
-                _this.renderNextFrame();
-            },
-            'render.pixelScale': this.resizeCanvas.bind(this),
-            'show.stats': this.setStats.bind(this),
-            'show.wireframe': this.setShowWireframe.bind(this),
-            'show.bounds': this.setShowBounds.bind(this),
-            'show.skeleton': this.setShowSkeleton.bind(this),
-            'show.axes': this.setShowAxes.bind(this),
-            'show.grid': this.setShowGrid.bind(this),
-            'show.normals': this.setNormalLength.bind(this),
             'show.fov': this.setFov.bind(this),
-            // tone
-            'lighting.tonemapping': this.setTonemapping.bind(this),
-            // env
-            'lighting.env.value': function (value) {
-                if (value && value !== 'None') {
-                    _this.loadFiles([{ url: value, filename: value }]);
+        };
+        // register control events
+        Object.keys(controlEvents).forEach(function (e) {
+            observer.on("".concat(e, ":set"), controlEvents[e]);
+            observer.set(e, _this.observer.get(e), false, false, true);
+        });
+    };
+    Viewer.prototype.focusCamera = function () {
+        var camera = this.camera.camera;
+        var bbox = this.calcSceneBounds();
+        if (this.cameraFocusBBox) {
+            var intersection = Viewer.calcBoundingBoxIntersection(this.cameraFocusBBox, bbox);
+            if (intersection) {
+                var len1 = bbox.halfExtents.length();
+                var len2 = this.cameraFocusBBox.halfExtents.length();
+                var len3 = intersection.halfExtents.length();
+                if ((Math.abs(len3 - len1) / len1 < 0.1) &&
+                    (Math.abs(len3 - len2) / len2 < 0.1)) {
+                    return;
                 }
-                else {
-                    _this.clearSkybox();
-                }
-            },
-            'lighting.env.skyboxMip': this.setSkyboxMip.bind(this),
-            'lighting.env.exposure': this.setEnvExposure.bind(this),
-            'lighting.env.backgroundColor': this.setBackgroundColor.bind(this),
-            'lighting.env.rotation': this.setEnvRotation.bind(this),
+            }
+        }
+        // calculate scene bounding box
+        var radius = bbox.halfExtents.length();
+        var distance = (radius * 1.4) / Math.sin(0.5 * camera.fov * camera.aspectRatio * math$1.DEG_TO_RAD);
+        if (this.cameraPosition) {
+            var vec = bbox.center.clone().sub(this.cameraPosition);
+            this.orbitCamera.vecToAzimElevDistance(vec, vec);
+            this.orbitCamera.azimElevDistance.snapto(vec);
+            this.cameraPosition = null;
+        }
+        else {
+            var aed = this.orbitCamera.azimElevDistance.target.clone();
+            aed.x = 45;
+            aed.y = -45;
+            aed.z = distance;
+            this.orbitCamera.azimElevDistance.snapto(aed);
+        }
+        this.orbitCamera.setBounds(bbox);
+        this.orbitCamera.focalPoint.snapto(bbox.center);
+        camera.nearClip = distance / 100;
+        camera.farClip = distance * 10;
+        var light = this.light;
+        light.light.shadowDistance = distance * 2;
+        this.cameraFocusBBox = bbox;
+    };
+    Viewer.prototype.calcSceneBounds = function () {
+        return this.meshInstances.length ?
+            this.calcMeshBoundingBox(this.meshInstances) :
+            (this.sceneRoot.children.length ?
+                this.calcHierBoundingBox(this.sceneRoot) : defaultSceneBounds);
+    };
+    // calculate the bounding box of the given mesh
+    Viewer.prototype.calcMeshBoundingBox = function (meshInstances) {
+        var bbox = new BoundingBox();
+        for (var i = 0; i < meshInstances.length; ++i) {
+            if (i === 0) {
+                bbox.copy(meshInstances[i].aabb);
+            }
+            else {
+                bbox.add(meshInstances[i].aabb);
+            }
+        }
+        return bbox;
+    };
+    // calculate the bounding box of the graph-node hierarchy
+    Viewer.prototype.calcHierBoundingBox = function (rootNode) {
+        var position = rootNode.getPosition();
+        var min_x = position.x;
+        var min_y = position.y;
+        var min_z = position.z;
+        var max_x = position.x;
+        var max_y = position.y;
+        var max_z = position.z;
+        var recurse = function (node) {
+            var p = node.getPosition();
+            if (p.x < min_x)
+                min_x = p.x;
+            else if (p.x > max_x)
+                max_x = p.x;
+            if (p.y < min_y)
+                min_y = p.y;
+            else if (p.y > max_y)
+                max_y = p.y;
+            if (p.z < min_z)
+                min_z = p.z;
+            else if (p.z > max_z)
+                max_z = p.z;
+            for (var i = 0; i < node.children.length; ++i) {
+                recurse(node.children[i]);
+            }
+        };
+        recurse(rootNode);
+        var result = new BoundingBox();
+        result.setMinMax(new Vec3(min_x, min_y, min_z), new Vec3(max_x, max_y, max_z));
+        return result;
+    };
+    Viewer.prototype.init_light = function () {
+        var _this = this;
+        var app = this.app;
+        // create the light
+        var light = this.light = new Entity();
+        var lightColor = new Color(1, 1, 1);
+        var intensity = 1;
+        var rotation = new Vec3(45, 30, 0);
+        light.addComponent("light", {
+            type: "directional",
+            color: lightColor,
+            castShadows: true,
+            intensity: intensity,
+            shadowBias: 0.2,
+            shadowDistance: 5,
+            normalOffsetBias: 0.05,
+            shadowResolution: 2048
+        });
+        light.setLocalEulerAngles(rotation);
+        app.root.addChild(light);
+        var sublight = this.sublight = new Entity();
+        sublight.addComponent("light", {
+            type: "directional",
+            color: lightColor,
+            castShadows: false,
+            intensity: intensity
+        });
+        sublight.setLocalEulerAngles(rotation);
+        app.root.addChild(sublight);
+        var controlEvents = {
             // main light
             'lighting.mainLight.intencity': this.setMainLightingIntencity.bind(this),
             'lighting.mainLight.color_r': this.setMainLightingColor_r.bind(this),
@@ -133329,45 +132983,167 @@ var Viewer = /** @class */ (function () {
             'lighting.subLight.color_b': this.setSubLightingColor_b.bind(this),
             'lighting.subLight.rotation_x': this.setSubLightingRotation_x.bind(this),
             'lighting.subLight.rotation_y': this.setSubLightingRotation_y.bind(this),
-            'lighting.subLight.rotation_z': this.setSubLightingRotation_z.bind(this),
-            // bloom
-            'scripts.bloom.enabled': this.setBloomEnabled.bind(this),
-            'scripts.bloom.bloomIntensity': this.setBloomIntensity.bind(this),
-            'scripts.bloom.bloomThreshold': this.setBloomThreshold.bind(this),
-            'scripts.bloom.blurAmount': this.setBlurAmount.bind(this),
-            // color adjust
-            'scripts.brightnesscontrast.enabled': this.setBrightnessContrastEnabled.bind(this),
-            'scripts.brightnesscontrast.brightness': this.setBrightness.bind(this),
-            'scripts.brightnesscontrast.contrast': this.setContrast.bind(this),
-            'scripts.huesaturation.enabled': this.setHueSaturationEnabled.bind(this),
-            'scripts.huesaturation.hue': this.setHue.bind(this),
-            'scripts.huesaturation.saturation': this.setSaturation.bind(this),
-            // dof
-            'scripts.bokeh.enabled': this.setBokehEnabled.bind(this),
-            'scripts.bokeh.maxBlur': this.setBokehMaxBlur.bind(this),
-            'scripts.bokeh.aperture': this.setBokehAperture.bind(this),
-            'scripts.bokeh.focus': this.setBokehFocus.bind(this),
-            // vignette
-            'scripts.vignette.enabled': this.setVignetteEnabled.bind(this),
-            'scripts.vignette.offset': this.setVignetteOffset.bind(this),
-            'scripts.vignette.darkness': this.setVignetteDarkness.bind(this),
-            'scene.variant.selected': this.setSelectedVariant.bind(this)
+            'lighting.subLight.rotation_z': this.setSubLightingRotation_z.bind(this)
         };
         // register control events
         Object.keys(controlEvents).forEach(function (e) {
             _this.observer.on("".concat(e, ":set"), controlEvents[e]);
             _this.observer.set(e, _this.observer.get(e), false, false, true);
         });
-        // this.observer.on('*:set', (path: string, value: any) => {
-        //     const pathArray = path.split('.');
-        //     if (pathArray[0] === 'scripts') {
-        //         camera.script[pathArray[1]][pathArray[2]] = value;
-        //     }
-        // });
-        this.observer.on('canvasResized', function () {
+    };
+    Viewer.prototype.init_skyBox = function () {
+        var _this = this;
+        var observer = this.observer;
+        this.skyboxLoaded = false;
+        this.setTonemapping(observer.get('lighting.tonemapping'));
+        this.setBackgroundColor(observer.get('lighting.env.backgroundColor'));
+        var controlEvents = {
+            // tone
+            'lighting.tonemapping': this.setTonemapping.bind(this),
+            // env
+            'lighting.env.value': function (value) {
+                if (value && value !== 'None') {
+                    _this.loadFiles([{ url: value, filename: value }]);
+                }
+                else {
+                    _this.clearSkybox();
+                }
+            },
+            'lighting.env.skyboxMip': this.setSkyboxMip.bind(this),
+            'lighting.env.exposure': this.setEnvExposure.bind(this),
+            'lighting.env.backgroundColor': this.setBackgroundColor.bind(this),
+            'lighting.env.rotation': this.setEnvRotation.bind(this),
+        };
+        // register control events
+        Object.keys(controlEvents).forEach(function (e) {
+            observer.on("".concat(e, ":set"), controlEvents[e]);
+            observer.set(e, observer.get(e), false, false, true);
+        });
+    };
+    Viewer.prototype.init_dropHandler = function () {
+        var _this = this;
+        var app = this.app;
+        var canvas = this.canvas;
+        // monkeypatch the mouse and touch input devices to ignore touch events
+        // when they don't originate from the canvas.
+        var origMouseHandler = app.mouse._moveHandler;
+        app.mouse.detach();
+        app.mouse._moveHandler = function (event) {
+            if (event.target === canvas) {
+                origMouseHandler(event);
+            }
+        };
+        app.mouse.attach(canvas);
+        var origTouchHandler = app.touch._moveHandler;
+        app.touch.detach();
+        app.touch._moveHandler = function (event) {
+            if (event.target === canvas) {
+                origTouchHandler(event);
+            }
+        };
+        app.touch.attach(canvas);
+        // create drop handler
+        this.dropHandler = new DropHandler(function (files, resetScene) {
+            _this.loadFiles(files, resetScene);
+            if (resetScene) {
+                _this.observer.set('glbUrl', '');
+            }
+        });
+        app.on('update', this.update, this);
+        app.on('frameend', this.onFrameend, this);
+        // Set the canvas to fill the window and automatically change resolution to be the same as the canvas size
+        var canvasSize = this.getCanvasSize();
+        app.setCanvasFillMode(FILLMODE_NONE, canvasSize.width, canvasSize.height);
+        app.setCanvasResolution(RESOLUTION_AUTO);
+        window.addEventListener("resize", function () {
             _this.resizeCanvas();
         });
     };
+    Viewer.prototype.init_object = function () {
+        var _this = this;
+        var app = this.app;
+        var observer = this.observer;
+        // create the scene and debug root nodes
+        var sceneRoot = new Entity("sceneRoot", app);
+        app.root.addChild(sceneRoot);
+        this.sceneRoot = sceneRoot;
+        this.entities = [];
+        this.entityAssets = [];
+        this.assets = [];
+        this.meshInstances = [];
+        this.sceneBounds = null;
+        var controlEvents = {
+            'scene.variant.selected': this.setSelectedVariant.bind(this)
+        };
+        // register control events
+        Object.keys(controlEvents).forEach(function (e) {
+            observer.on("".concat(e, ":set"), controlEvents[e]);
+            observer.set(e, _this.observer.get(e), false, false, true);
+        });
+    };
+    // Events
+    Viewer.prototype.setSelectedVariant = function (variant) {
+        if (variant) {
+            this.entityAssets.forEach(function (entityAsset) {
+                if (entityAsset.asset.resource.getMaterialVariants().indexOf(variant) !== -1) {
+                    entityAsset.asset.resource.applyMaterialVariant(entityAsset.entity, variant);
+                }
+            });
+        }
+    };
+    Viewer.prototype.init_stats = function () {
+        var _this = this;
+        var app = this.app;
+        var observer = this.observer;
+        // construct ministats, default off
+        this.miniStats = new playcanvasExtras.exports.MiniStats(app);
+        this.miniStats.enabled = observer.get('show.stats');
+        var controlEvents = {
+            'show.stats': this.setStats.bind(this),
+        };
+        // register control events
+        Object.keys(controlEvents).forEach(function (e) {
+            observer.on("".concat(e, ":set"), controlEvents[e]);
+            observer.set(e, _this.observer.get(e), false, false, true);
+        });
+    };
+    //#endregion
+    //-----------------------------------
+    //#region canvas
+    Viewer.prototype.getCanvasSize = function () {
+        return {
+            width: document.body.clientWidth - document.getElementById("panel-left").offsetWidth,
+            height: document.body.clientHeight
+        };
+    };
+    Viewer.prototype.resizeCanvas = function () {
+        var device = this.app.graphicsDevice;
+        var canvasSize = this.getCanvasSize();
+        device.maxPixelRatio = window.devicePixelRatio;
+        this.app.resizeCanvas(canvasSize.width, canvasSize.height);
+    };
+    //#endregion
+    //-----------------------------------
+    //#region Life Cycle
+    Viewer.prototype.update = function (deltaTime) {
+        // update the orbit camera
+        this.orbitCamera.update(deltaTime);
+    };
+    Viewer.prototype.onFrameend = function () {
+        if (this.firstFrame) {
+            this.firstFrame = false;
+            // focus camera after first frame otherwise skinned model bounding
+            // boxes are incorrect
+            this.focusCamera();
+        }
+        else if (this.loadTimestamp !== null) {
+            this.observer.set('scene.loadTime', "".concat(Date.now() - this.loadTimestamp, " ms"));
+            this.loadTimestamp = null;
+            this.observer.set('spinner', false);
+        }
+    };
+    //#endregion
+    //-----------------------------------
     //#region SceneData
     // reset the viewer, unloading resources
     Viewer.prototype.resetScene = function () {
@@ -133387,8 +133163,6 @@ var Viewer = /** @class */ (function () {
         this.meshInstances = [];
         this.observer.set('scene.variants.list', '[]');
         this.updateSceneInfo();
-        this.dirtyWireframe = this.dirtyBounds = this.dirtySkeleton = this.dirtyGrid = this.dirtyNormals = true;
-        this.renderNextFrame();
     };
     Viewer.prototype.updateSceneInfo = function () {
         var meshCount = 0;
@@ -133456,105 +133230,10 @@ var Viewer = /** @class */ (function () {
         if (this.meshInstances.length === 0) {
             this.observer.set('show.skeleton', true);
         }
-        // dirty everything
-        this.dirtyWireframe = this.dirtyBounds = this.dirtySkeleton = this.dirtyGrid = this.dirtyNormals = true;
         // we can't refocus the camera here because the scene hierarchy only gets updated
         // during render. we must instead set a flag, wait for a render to take place and
         // then focus the camera.
         this.firstFrame = true;
-        this.renderNextFrame();
-    };
-    //#endregion
-    //#region Camera
-    // move the camera to view the loaded object
-    Viewer.prototype.focusCamera = function () {
-        var camera = this.camera.camera;
-        var bbox = this.calcSceneBounds();
-        if (this.cameraFocusBBox) {
-            var intersection = Viewer.calcBoundingBoxIntersection(this.cameraFocusBBox, bbox);
-            if (intersection) {
-                var len1 = bbox.halfExtents.length();
-                var len2 = this.cameraFocusBBox.halfExtents.length();
-                var len3 = intersection.halfExtents.length();
-                if ((Math.abs(len3 - len1) / len1 < 0.1) &&
-                    (Math.abs(len3 - len2) / len2 < 0.1)) {
-                    return;
-                }
-            }
-        }
-        // calculate scene bounding box
-        var radius = bbox.halfExtents.length();
-        var distance = (radius * 1.4) / Math.sin(0.5 * camera.fov * camera.aspectRatio * math$1.DEG_TO_RAD);
-        if (this.cameraPosition) {
-            var vec = bbox.center.clone().sub(this.cameraPosition);
-            this.orbitCamera.vecToAzimElevDistance(vec, vec);
-            this.orbitCamera.azimElevDistance.snapto(vec);
-            this.cameraPosition = null;
-        }
-        else {
-            var aed = this.orbitCamera.azimElevDistance.target.clone();
-            aed.z = distance;
-            this.orbitCamera.azimElevDistance.snapto(aed);
-        }
-        this.orbitCamera.setBounds(bbox);
-        this.orbitCamera.focalPoint.snapto(bbox.center);
-        camera.nearClip = distance / 100;
-        camera.farClip = distance * 10;
-        var light = this.light;
-        light.light.shadowDistance = distance * 2;
-        this.cameraFocusBBox = bbox;
-    };
-    //#endregion
-    //#region UI
-    Viewer.prototype.getCanvasSize = function () {
-        return {
-            width: document.body.clientWidth - document.getElementById("panel-left").offsetWidth,
-            height: document.body.clientHeight
-        };
-    };
-    Viewer.prototype.resizeCanvas = function () {
-        this.observer;
-        var device = this.app.graphicsDevice;
-        var canvasSize = this.getCanvasSize();
-        device.maxPixelRatio = window.devicePixelRatio;
-        this.app.resizeCanvas(canvasSize.width, canvasSize.height);
-        this.renderNextFrame();
-        // const createTexture = (width: number, height: number, format: number) => {
-        //     return new pc.Texture(device, {
-        //         width: width,
-        //         height: height,
-        //         format: format,
-        //         mipmaps: false,
-        //         minFilter: pc.FILTER_NEAREST,
-        //         magFilter: pc.FILTER_NEAREST,
-        //         addressU: pc.ADDRESS_CLAMP_TO_EDGE,
-        //         addressV: pc.ADDRESS_CLAMP_TO_EDGE
-        //     });
-        // };
-        // out with the old
-        // const old = this.camera.camera.renderTarget;
-        // if (old) {
-        //     old.colorBuffer?.destroy();
-        //     old.depthBuffer?.destroy();
-        //     old.destroy();
-        // }
-        // in with the new
-        // const pixelScale = observer.get('render.pixelScale');
-        // const w = Math.floor(canvasSize.width * window.devicePixelRatio / pixelScale);
-        // const h = Math.floor(canvasSize.height * window.devicePixelRatio / pixelScale);
-        // const colorBuffer = createTexture(w, h, pc.PIXELFORMAT_R8_G8_B8_A8);
-        // const depthBuffer = createTexture(w, h, pc.PIXELFORMAT_DEPTH);
-        // const renderTarget = new pc.RenderTarget({
-        //     colorBuffer: colorBuffer,
-        //     depthBuffer: depthBuffer,
-        //     flipY: false,
-        //     samples: observer.get('render.multisample') ? device.maxSamples : 1,
-        //     autoResolve: false
-        // });
-        // this.camera.camera.renderTarget = renderTarget;
-        // if(this.bloom)
-        // {
-        // }
     };
     //#endregion
     //#region Load Model
@@ -133645,7 +133324,10 @@ var Viewer = /** @class */ (function () {
         });
         this.observer.set('spinner', true);
         this.observer.set('error', null);
-        this.clearCta();
+        // clearCta
+        document.querySelector('#panel-left').classList.add('no-cta');
+        document.querySelector('#application-canvas').classList.add('no-cta');
+        document.querySelector('.load-button-panel').classList.add('hide');
         this.app.assets.add(containerAsset);
         this.app.assets.load(containerAsset);
     };
@@ -133704,7 +133386,6 @@ var Viewer = /** @class */ (function () {
     Viewer.prototype.clearSkybox = function () {
         this.app.scene.envAtlas = null;
         this.app.scene.setSkybox(null);
-        this.renderNextFrame();
         this.skyboxLoaded = false;
     };
     // initialize the faces and prefiltered lighting data from the given
@@ -133717,7 +133398,6 @@ var Viewer = /** @class */ (function () {
         lighting.destroy();
         this.app.scene.envAtlas = envAtlas;
         this.app.scene.skybox = skybox;
-        this.renderNextFrame();
     };
     // initialize the faces and prefiltered lighting data from the given
     // skybox texture, which is either a cubemap or equirect texture.
@@ -133764,7 +133444,6 @@ var Viewer = /** @class */ (function () {
         lightingSource.destroy();
         // assign the textures to the scene
         app.scene.setSkybox(cubemaps);
-        this.renderNextFrame();
     };
     // load the image files into the skybox. this function supports loading a single equirectangular
     // skybox image or 6 cubemap faces.
@@ -133836,158 +133515,6 @@ var Viewer = /** @class */ (function () {
         this.skyboxLoaded = true;
     };
     //#endregion
-    //#region Life Cycle
-    Viewer.prototype.update = function (deltaTime) {
-        // update the orbit camera
-        this.orbitCamera.update(deltaTime);
-        var maxdiff = function (a, b) {
-            var result = 0;
-            for (var i = 0; i < 16; ++i) {
-                result = Math.max(result, Math.abs(a.data[i] - b.data[i]));
-            }
-            return result;
-        };
-        // if the camera has moved since the last render
-        var cameraWorldTransform = this.camera.getWorldTransform();
-        if (maxdiff(cameraWorldTransform, this.prevCameraMat) > 1e-04) {
-            this.prevCameraMat.copy(cameraWorldTransform);
-            this.renderNextFrame();
-        }
-        // always render during xr sessions
-        if (this.observer.get('xrActive')) {
-            this.renderNextFrame();
-        }
-        // or the ministats is enabled
-        if (this.miniStats.enabled) {
-            this.renderNextFrame();
-        }
-    };
-    Viewer.prototype.renderNextFrame = function () {
-        this.app.renderNextFrame = true;
-        // if (this.multiframe) {
-        //     this.multiframe.moved();
-        // }
-    };
-    Viewer.prototype.clearCta = function () {
-        document.querySelector('#panel-left').classList.add('no-cta');
-        document.querySelector('#application-canvas').classList.add('no-cta');
-        document.querySelector('.load-button-panel').classList.add('hide');
-    };
-    // generate and render debug elements on prerender
-    Viewer.prototype.onPrerender = function () {
-        var _this = this;
-        // don't update on the first frame
-        if (!this.firstFrame) {
-            var meshInstance = void 0;
-            // wireframe
-            if (this.dirtyWireframe) {
-                this.dirtyWireframe = false;
-                for (var i = 0; i < this.meshInstances.length; ++i) {
-                    this.meshInstances[i].renderStyle = this.showWireframe ? RENDERSTYLE_WIREFRAME : RENDERSTYLE_SOLID;
-                }
-            }
-            // debug bounds
-            if (this.dirtyBounds) {
-                this.dirtyBounds = false;
-                // calculate bounds
-                this.sceneBounds = this.calcSceneBounds();
-                this.debugBounds.clear();
-                if (this.showBounds) {
-                    this.debugBounds.box(this.sceneBounds.getMin(), this.sceneBounds.getMax());
-                }
-                this.debugBounds.update();
-                var v = new Vec3(this.sceneBounds.halfExtents.x * 2, this.sceneBounds.halfExtents.y * 2, this.sceneBounds.halfExtents.z * 2);
-                this.observer.set('scene.bounds', v.toString());
-            }
-            // debug normals
-            if (this.dirtyNormals) {
-                this.dirtyNormals = false;
-                this.debugNormals.clear();
-                if (this.normalLength > 0) {
-                    for (var i = 0; i < this.meshInstances.length; ++i) {
-                        meshInstance = this.meshInstances[i];
-                        var vertexBuffer = meshInstance.morphInstance ?
-                            // @ts-ignore TODO not defined in pc
-                            meshInstance.morphInstance._vertexBuffer : meshInstance.mesh.vertexBuffer;
-                        if (vertexBuffer) {
-                            var skinMatrices = meshInstance.skinInstance ? meshInstance.skinInstance.matrices : null;
-                            // if there is skinning we need to manually update matrices here otherwise
-                            // our normals are always a frame behind
-                            if (skinMatrices) {
-                                // @ts-ignore TODO not defined in pc
-                                meshInstance.skinInstance.updateMatrices(meshInstance.node);
-                            }
-                            this.debugNormals.generateNormals(vertexBuffer, meshInstance.node.getWorldTransform(), this.normalLength, skinMatrices);
-                        }
-                    }
-                }
-                this.debugNormals.update();
-            }
-            // debug skeleton
-            if (this.dirtySkeleton) {
-                this.dirtySkeleton = false;
-                this.debugSkeleton.clear();
-                if (this.showSkeleton || this.showAxes) {
-                    this.entities.forEach(function (entity) {
-                        if (_this.meshInstances.length === 0 || entity.findComponent("render")) {
-                            _this.debugSkeleton.generateSkeleton(entity, _this.showSkeleton, _this.showAxes, _this.selectedNode);
-                        }
-                    });
-                }
-                this.debugSkeleton.update();
-            }
-            // debug grid
-            if (this.sceneBounds && this.dirtyGrid) {
-                this.dirtyGrid = false;
-                this.debugGrid.clear();
-                if (this.showGrid) {
-                    // calculate primary spacing
-                    var spacing = Math.pow(10, Math.floor(Math.log10(this.sceneBounds.halfExtents.length())));
-                    var v0 = new Vec3(0, 0, 0);
-                    var v1 = new Vec3(0, 0, 0);
-                    var numGrids = 10;
-                    var a = numGrids * spacing;
-                    for (var x = -numGrids; x < numGrids + 1; ++x) {
-                        var b = x * spacing;
-                        v0.set(-a, 0, b);
-                        v1.set(a, 0, b);
-                        this.debugGrid.line(v0, v1, b === 0 ? (0x80000000 >>> 0) : (0x80ffffff >>> 0));
-                        v0.set(b, 0, -a);
-                        v1.set(b, 0, a);
-                        this.debugGrid.line(v0, v1, b === 0 ? (0x80000000 >>> 0) : (0x80ffffff >>> 0));
-                    }
-                }
-                this.debugGrid.update();
-            }
-        }
-    };
-    Viewer.prototype.onPostrender = function () {
-        // resolve the (possibly multisampled) render target
-        // if (this.camera.camera.renderTarget._samples > 1) {
-        //     this.camera.camera.renderTarget.resolve();
-        // }
-        // perform mulitiframe update. returned flag indicates whether more frames
-        // are needed.
-        //this.multiframeBusy = this.multiframe.update();
-    };
-    Viewer.prototype.onFrameend = function () {
-        if (this.firstFrame) {
-            this.firstFrame = false;
-            // focus camera after first frame otherwise skinned model bounding
-            // boxes are incorrect
-            this.focusCamera();
-            this.renderNextFrame();
-        }
-        else if (this.loadTimestamp !== null) {
-            this.observer.set('scene.loadTime', "".concat(Date.now() - this.loadTimestamp, " ms"));
-            this.loadTimestamp = null;
-            this.observer.set('spinner', false);
-        }
-        // if (this.multiframeBusy) {
-        //     this.app.renderNextFrame = true;
-        // }
-    };
-    //#endregion
     //#region calcBoundingBox
     // collects all mesh instances from entity hierarchy
     Viewer.prototype.collectMeshInstances = function (entity) {
@@ -134013,51 +133540,6 @@ var Viewer = /** @class */ (function () {
             this.meshInstances = this.meshInstances.concat(meshInstances);
         }
     };
-    // calculate the bounding box of the given mesh
-    Viewer.calcMeshBoundingBox = function (meshInstances) {
-        var bbox = new BoundingBox();
-        for (var i = 0; i < meshInstances.length; ++i) {
-            if (i === 0) {
-                bbox.copy(meshInstances[i].aabb);
-            }
-            else {
-                bbox.add(meshInstances[i].aabb);
-            }
-        }
-        return bbox;
-    };
-    // calculate the bounding box of the graph-node hierarchy
-    Viewer.calcHierBoundingBox = function (rootNode) {
-        var position = rootNode.getPosition();
-        var min_x = position.x;
-        var min_y = position.y;
-        var min_z = position.z;
-        var max_x = position.x;
-        var max_y = position.y;
-        var max_z = position.z;
-        var recurse = function (node) {
-            var p = node.getPosition();
-            if (p.x < min_x)
-                min_x = p.x;
-            else if (p.x > max_x)
-                max_x = p.x;
-            if (p.y < min_y)
-                min_y = p.y;
-            else if (p.y > max_y)
-                max_y = p.y;
-            if (p.z < min_z)
-                min_z = p.z;
-            else if (p.z > max_z)
-                max_z = p.z;
-            for (var i = 0; i < node.children.length; ++i) {
-                recurse(node.children[i]);
-            }
-        };
-        recurse(rootNode);
-        var result = new BoundingBox();
-        result.setMinMax(new Vec3(min_x, min_y, min_z), new Vec3(max_x, max_y, max_z));
-        return result;
-    };
     // calculate the intersection of the two bounding boxes
     Viewer.calcBoundingBoxIntersection = function (bbox1, bbox2) {
         // bounds don't intersect
@@ -134072,169 +133554,97 @@ var Viewer = /** @class */ (function () {
         result.setMinMax(new Vec3(Math.max(min1.x, min2.x), Math.max(min1.y, min2.y), Math.max(min1.z, min2.z)), new Vec3(Math.min(max1.x, max2.x), Math.min(max1.y, max2.y), Math.min(max1.z, max2.z)));
         return result;
     };
-    Viewer.prototype.calcSceneBounds = function () {
-        return this.meshInstances.length ?
-            Viewer.calcMeshBoundingBox(this.meshInstances) :
-            (this.sceneRoot.children.length ?
-                Viewer.calcHierBoundingBox(this.sceneRoot) : defaultSceneBounds);
-    };
     //#endregion
     //#region Set Property
-    // to change samples at runtime execute in the debugger 'viewer.setSamples(5, false, 2, 0)'
-    Viewer.prototype.setSamples = function (numSamples, jitter, size, sigma) {
-        //this.multiframe.setSamples(numSamples, jitter, size, sigma);
-        this.renderNextFrame();
-    };
-    Viewer.prototype.setSelectedVariant = function (variant) {
-        if (variant) {
-            this.entityAssets.forEach(function (entityAsset) {
-                if (entityAsset.asset.resource.getMaterialVariants().indexOf(variant) !== -1) {
-                    entityAsset.asset.resource.applyMaterialVariant(entityAsset.entity, variant);
-                }
-            });
-            this.renderNextFrame();
-        }
-    };
     Viewer.prototype.setStats = function (show) {
         this.miniStats.enabled = show;
-        this.renderNextFrame();
-    };
-    Viewer.prototype.setShowWireframe = function (show) {
-        this.showWireframe = show;
-        this.dirtyWireframe = true;
-        this.renderNextFrame();
-    };
-    Viewer.prototype.setShowBounds = function (show) {
-        this.showBounds = show;
-        this.dirtyBounds = true;
-        this.renderNextFrame();
-    };
-    Viewer.prototype.setShowSkeleton = function (show) {
-        this.showSkeleton = show;
-        this.dirtySkeleton = true;
-        this.renderNextFrame();
-    };
-    Viewer.prototype.setShowAxes = function (show) {
-        this.showAxes = show;
-        this.dirtySkeleton = true;
-        this.renderNextFrame();
-    };
-    Viewer.prototype.setShowGrid = function (show) {
-        this.showGrid = show;
-        this.dirtyGrid = true;
-        this.renderNextFrame();
-    };
-    Viewer.prototype.setNormalLength = function (length) {
-        this.normalLength = length;
-        this.dirtyNormals = true;
-        this.renderNextFrame();
     };
     Viewer.prototype.setFov = function (fov) {
         this.camera.camera.fov = fov;
-        this.renderNextFrame();
     };
     Viewer.prototype.setEnvRotation = function (factor) {
         // update skybox
         var rot = new Quat();
         rot.setFromEulerAngles(0, factor, 0);
         this.app.scene.skyboxRotation = rot;
-        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingIntencity = function (factor) {
         this.light.light.intensity = factor;
-        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingColor_r = function (value) {
         var color = this.light.light.color;
         color.r = value / 255;
         this.light.light.color = color;
-        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingColor_g = function (value) {
         var color = this.light.light.color;
         color.g = value / 255;
         this.light.light.color = color;
-        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingColor_b = function (value) {
         var color = this.light.light.color;
         color.b = value / 255;
         this.light.light.color = color;
-        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingRotation_x = function (factor) {
         var angle = this.light.getLocalEulerAngles();
         angle.x = factor;
         this.light.setLocalEulerAngles(angle);
-        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingRotation_y = function (factor) {
         var angle = this.light.getLocalEulerAngles();
         angle.y = factor;
         this.light.setLocalEulerAngles(angle);
-        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingRotation_z = function (factor) {
         var angle = this.light.getLocalEulerAngles();
         angle.z = factor;
         this.light.setLocalEulerAngles(angle);
-        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightShadow = function (enable) {
         this.light.light.castShadows = enable;
-        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightShadowIntencity = function (value) {
         this.light.light.shadowIntensity = value;
-        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightShadowResulution = function (value) {
         this.light.light.shadowResolution = value;
-        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingIntencity = function (factor) {
         this.sublight.light.intensity = factor;
-        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingColor_r = function (value) {
         var color = this.sublight.light.color;
         color.r = value / 255;
         this.sublight.light.color = color;
-        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingColor_g = function (value) {
         var color = this.sublight.light.color;
         color.g = value / 255;
         this.sublight.light.color = color;
-        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingColor_b = function (value) {
         var color = this.sublight.light.color;
         color.b = value / 255;
         this.sublight.light.color = color;
-        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingRotation_x = function (factor) {
         var angle = this.sublight.getLocalEulerAngles();
         angle.x = factor;
         this.sublight.setLocalEulerAngles(angle);
-        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingRotation_y = function (factor) {
         var angle = this.sublight.getLocalEulerAngles();
         angle.y = factor;
         this.sublight.setLocalEulerAngles(angle);
-        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingRotation_z = function (factor) {
         var angle = this.sublight.getLocalEulerAngles();
         angle.z = factor;
         this.sublight.setLocalEulerAngles(angle);
-        this.renderNextFrame();
     };
     Viewer.prototype.setEnvExposure = function (factor) {
         this.app.scene.skyboxIntensity = Math.pow(2, factor);
-        this.renderNextFrame();
     };
     Viewer.prototype.setTonemapping = function (tonemapping) {
         var mapping = {
@@ -134244,7 +133654,6 @@ var Viewer = /** @class */ (function () {
             ACES: TONEMAP_ACES
         };
         this.app.scene.toneMapping = mapping.hasOwnProperty(tonemapping) ? mapping[tonemapping] : TONEMAP_ACES;
-        this.renderNextFrame();
     };
     Viewer.prototype.setBackgroundColor = function (color) {
         var cnv = function (value) { return Math.max(0, Math.min(255, Math.floor(value * 255))); };
@@ -134253,7 +133662,6 @@ var Viewer = /** @class */ (function () {
     Viewer.prototype.setSkyboxMip = function (mip) {
         this.app.scene.layers.getLayerById(LAYERID_SKYBOX).enabled = (mip !== 0);
         this.app.scene.skyboxMip = mip - 1;
-        this.renderNextFrame();
     };
     Viewer.prototype.setBloomEnabled = function (value) {
         this.setBloomApply();
@@ -134275,7 +133683,6 @@ var Viewer = /** @class */ (function () {
                 attributes: this.observer.get('scripts.bloom')
             });
         }
-        this.renderNextFrame();
     };
     Viewer.prototype.setBrightnessContrastEnabled = function (value) {
         this.setBrightnessContrastApply();
@@ -134294,7 +133701,6 @@ var Viewer = /** @class */ (function () {
                 attributes: this.observer.get('scripts.brightnesscontrast')
             });
         }
-        this.renderNextFrame();
     };
     Viewer.prototype.setHueSaturationEnabled = function (value) {
         this.setHueSaturatioApply();
@@ -134313,7 +133719,6 @@ var Viewer = /** @class */ (function () {
                 attributes: this.observer.get('scripts.huesaturation')
             });
         }
-        this.renderNextFrame();
     };
     Viewer.prototype.setVignetteEnabled = function (value) {
         this.setVignetteApply();
@@ -134332,7 +133737,6 @@ var Viewer = /** @class */ (function () {
                 attributes: this.observer.get('scripts.vignette')
             });
         }
-        this.renderNextFrame();
     };
     Viewer.prototype.setBokehEnabled = function (value) {
         this.setBokehApply();
@@ -134354,7 +133758,6 @@ var Viewer = /** @class */ (function () {
                 attributes: this.observer.get('scripts.bokeh')
             });
         }
-        this.renderNextFrame();
     };
     //#endregion
     //#region Util
@@ -134392,20 +133795,8 @@ var observerData = {
     ui: {
         active: null
     },
-    render: {
-        multisampleSupported: true,
-        multisample: false,
-        hq: false,
-        pixelScale: 1
-    },
     show: {
         stats: false,
-        wireframe: false,
-        bounds: false,
-        skeleton: false,
-        axes: false,
-        grid: false,
-        normals: 0,
         fov: 45
     },
     lighting: {
@@ -134515,8 +133906,6 @@ var observerData = {
     },
     spinner: false,
     error: null,
-    xrSupported: false,
-    xrActive: false,
     glbUrl: null
 };
 // initialize the apps state
