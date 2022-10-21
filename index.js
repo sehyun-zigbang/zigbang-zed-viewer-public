@@ -129357,6 +129357,26 @@ var BloomPanel = /** @class */ (function (_super) {
     };
     return BloomPanel;
 }(React.Component));
+var ColorAdjustPanel = /** @class */ (function (_super) {
+    __extends(ColorAdjustPanel, _super);
+    function ColorAdjustPanel() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ColorAdjustPanel.prototype.shouldComponentUpdate = function (nextProps) {
+        return JSON.stringify(nextProps.scripts) !== JSON.stringify(this.props.scripts);
+    };
+    ColorAdjustPanel.prototype.render = function () {
+        var props = this.props;
+        return (React.createElement(Panel$1, { headerText: 'COLOR ADJUST', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
+            React.createElement(Toggle, { label: 'Enable', value: props.scripts.brightnesscontrast.enabled, setProperty: function (value) { return props.setProperty('scripts.brightnesscontrast.enabled', value); } }),
+            React.createElement(Slider, { label: 'Brightness', precision: 2, min: -1, max: 1, value: props.scripts.brightnesscontrast.brightness, setProperty: function (value) { return props.setProperty('scripts.brightnesscontrast.brightness', value); } }),
+            React.createElement(Slider, { label: 'Contrast', precision: 2, min: -1, max: 1, value: props.scripts.brightnesscontrast.contrast, setProperty: function (value) { return props.setProperty('scripts.brightnesscontrast.contrast', value); } }),
+            React.createElement(Toggle, { label: 'Enable', value: props.scripts.huesaturation.enabled, setProperty: function (value) { return props.setProperty('scripts.huesaturation.enabled', value); } }),
+            React.createElement(Slider, { label: 'Hue', precision: 2, min: -1, max: 1, value: props.scripts.huesaturation.hue, setProperty: function (value) { return props.setProperty('scripts.huesaturation.hue', value); } }),
+            React.createElement(Slider, { label: 'Saturation', precision: 2, min: -1, max: 1, value: props.scripts.huesaturation.saturation, setProperty: function (value) { return props.setProperty('scripts.huesaturation.saturation', value); } })));
+    };
+    return ColorAdjustPanel;
+}(React.Component));
 var ShowPanel = /** @class */ (function (_super) {
     __extends(ShowPanel, _super);
     function ShowPanel() {
@@ -129415,6 +129435,7 @@ var LeftPanel = /** @class */ (function (_super) {
                 React.createElement(EnvironmentPanel, { setProperty: this.props.setProperty, lightingData: this.props.observerData.lighting, uiData: this.props.observerData.ui }),
                 React.createElement(LightingPanel, { setProperty: this.props.setProperty, lightingData: this.props.observerData.lighting, uiData: this.props.observerData.ui }),
                 React.createElement(SubLightingPanel, { setProperty: this.props.setProperty, lightingData: this.props.observerData.lighting, uiData: this.props.observerData.ui }),
+                React.createElement(ColorAdjustPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(BloomPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(SSAOPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(ShowPanel, { setProperty: this.props.setProperty, showData: this.props.observerData.show, uiData: this.props.observerData.ui }))));
@@ -133034,7 +133055,6 @@ var Viewer = /** @class */ (function () {
         this.readDepth = null;
         this.cursorWorld = new Vec3();
         this.loadTimestamp = null;
-        this.updateBloom = false;
         // create the application
         var app = new Application(canvas, {
             mouse: new Mouse(canvas),
@@ -133051,7 +133071,9 @@ var Viewer = /** @class */ (function () {
         });
         this.app = app;
         var assets = {
-            'bloom': new Asset('bloom', 'script', { url: getAssetPath('effect/bloom.js') })
+            'bloom': new Asset('bloom', 'script', { url: getAssetPath('effect/bloom.js') }),
+            'brightnesscontrast': new Asset('brightnesscontrast', 'script', { url: getAssetPath('effect/brightnesscontrast.js') }),
+            'huesaturation': new Asset('huesaturation', 'script', { url: getAssetPath('effect/huesaturation.js') })
         };
         var assetListLoader = new AssetListLoader(Object.values(assets), app.assets);
         assetListLoader.load(function () {
@@ -133271,11 +133293,18 @@ var Viewer = /** @class */ (function () {
             'lighting.subLight.rotation_x': this.setSubLightingRotation_x.bind(this),
             'lighting.subLight.rotation_y': this.setSubLightingRotation_y.bind(this),
             'lighting.subLight.rotation_z': this.setSubLightingRotation_z.bind(this),
-            // // bloom
+            // bloom
             'scripts.bloom.enabled': this.setBloomEnabled.bind(this),
             'scripts.bloom.bloomIntensity': this.setBloomIntensity.bind(this),
             'scripts.bloom.bloomThreshold': this.setBloomThreshold.bind(this),
             'scripts.bloom.blurAmount': this.setBlurAmount.bind(this),
+            // color adjust
+            'scripts.brightnesscontrast.enabled': this.setBrightnessContrastEnabled.bind(this),
+            'scripts.brightnesscontrast.brightness': this.setBrightness.bind(this),
+            'scripts.brightnesscontrast.contrast': this.setContrast.bind(this),
+            'scripts.huesaturation.enabled': this.setHueSaturationEnabled.bind(this),
+            'scripts.huesaturation.hue': this.setHue.bind(this),
+            'scripts.huesaturation.saturation': this.setSaturation.bind(this),
             'scene.variant.selected': this.setSelectedVariant.bind(this)
         };
         // register control events
@@ -134202,6 +134231,44 @@ var Viewer = /** @class */ (function () {
         }
         this.renderNextFrame();
     };
+    Viewer.prototype.setBrightnessContrastEnabled = function (value) {
+        this.setBrightnessContrastApply();
+    };
+    Viewer.prototype.setBrightness = function (value) {
+        this.setBrightnessContrastApply();
+    };
+    Viewer.prototype.setContrast = function (value) {
+        this.setBrightnessContrastApply();
+    };
+    Viewer.prototype.setBrightnessContrastApply = function () {
+        var enabled = this.observer.get('scripts.brightnesscontrast.enabled');
+        this.camera.script.destroy('brightnesscontrast');
+        if (enabled) {
+            this.camera.script.create('brightnesscontrast', {
+                attributes: this.observer.get('scripts.brightnesscontrast')
+            });
+        }
+        this.renderNextFrame();
+    };
+    Viewer.prototype.setHueSaturationEnabled = function (value) {
+        this.setHueSaturatioApply();
+    };
+    Viewer.prototype.setHue = function (value) {
+        this.setHueSaturatioApply();
+    };
+    Viewer.prototype.setSaturation = function (value) {
+        this.setHueSaturatioApply();
+    };
+    Viewer.prototype.setHueSaturatioApply = function () {
+        var enabled = this.observer.get('scripts.huesaturation.enabled');
+        this.camera.script.destroy('huesaturation');
+        if (enabled) {
+            this.camera.script.create('huesaturation', {
+                attributes: this.observer.get('scripts.huesaturation')
+            });
+        }
+        this.renderNextFrame();
+    };
     //#endregion
     //#region Util
     // extract query params. taken from https://stackoverflow.com/a/21152762
@@ -134324,6 +134391,16 @@ var observerData = {
         name: null
     },
     scripts: {
+        brightnesscontrast: {
+            enabled: false,
+            brightness: 0,
+            contrast: 0,
+        },
+        huesaturation: {
+            enabled: false,
+            hue: 0,
+            saturation: 0
+        },
         bloom: {
             enabled: true,
             bloomIntensity: 0.5,
