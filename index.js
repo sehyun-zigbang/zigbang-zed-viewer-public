@@ -129320,7 +129320,7 @@ var SubLightingPanel = /** @class */ (function (_super) {
     };
     return SubLightingPanel;
 }(React.Component));
-var SSAOPanel = /** @class */ (function (_super) {
+/** @class */ ((function (_super) {
     __extends(SSAOPanel, _super);
     function SSAOPanel() {
         return _super !== null && _super.apply(this, arguments) || this;
@@ -129338,7 +129338,7 @@ var SSAOPanel = /** @class */ (function (_super) {
             React.createElement(Select, { label: 'Downscale', value: props.scripts.ssao.downscale, type: 'number', options: [{ v: 1, t: 'None' }, { v: 2, t: '50%' }, { v: '4', t: '25%' }], setProperty: function (value) { return props.setProperty('scripts.ssao.downscale', value); } })));
     };
     return SSAOPanel;
-}(React.Component));
+})(React.Component));
 var BloomPanel = /** @class */ (function (_super) {
     __extends(BloomPanel, _super);
     function BloomPanel() {
@@ -129367,7 +129367,7 @@ var ColorAdjustPanel = /** @class */ (function (_super) {
     };
     ColorAdjustPanel.prototype.render = function () {
         var props = this.props;
-        return (React.createElement(Panel$1, { headerText: 'COLOR ADJUST', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
+        return (React.createElement(Panel$1, { headerText: 'COLOR', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
             React.createElement(Toggle, { label: 'Enable', value: props.scripts.brightnesscontrast.enabled, setProperty: function (value) { return props.setProperty('scripts.brightnesscontrast.enabled', value); } }),
             React.createElement(Slider, { label: 'Brightness', precision: 2, min: -1, max: 1, value: props.scripts.brightnesscontrast.brightness, setProperty: function (value) { return props.setProperty('scripts.brightnesscontrast.brightness', value); } }),
             React.createElement(Slider, { label: 'Contrast', precision: 2, min: -1, max: 1, value: props.scripts.brightnesscontrast.contrast, setProperty: function (value) { return props.setProperty('scripts.brightnesscontrast.contrast', value); } }),
@@ -129376,6 +129376,23 @@ var ColorAdjustPanel = /** @class */ (function (_super) {
             React.createElement(Slider, { label: 'Saturation', precision: 2, min: -1, max: 1, value: props.scripts.huesaturation.saturation, setProperty: function (value) { return props.setProperty('scripts.huesaturation.saturation', value); } })));
     };
     return ColorAdjustPanel;
+}(React.Component));
+var VinettePanel = /** @class */ (function (_super) {
+    __extends(VinettePanel, _super);
+    function VinettePanel() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    VinettePanel.prototype.shouldComponentUpdate = function (nextProps) {
+        return JSON.stringify(nextProps.scripts) !== JSON.stringify(this.props.scripts);
+    };
+    VinettePanel.prototype.render = function () {
+        var props = this.props;
+        return (React.createElement(Panel$1, { headerText: 'VINETTE', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
+            React.createElement(Toggle, { label: 'Enable', value: props.scripts.vignette.enabled, setProperty: function (value) { return props.setProperty('scripts.vignette.enabled', value); } }),
+            React.createElement(Slider, { label: 'Offset', precision: 2, min: 0, max: 2, value: props.scripts.vignette.offset, setProperty: function (value) { return props.setProperty('scripts.vignette.offset', value); } }),
+            React.createElement(Slider, { label: 'Darkness', precision: 2, min: 0, max: 1, value: props.scripts.vignette.darkness, setProperty: function (value) { return props.setProperty('scripts.vignette.darkness', value); } })));
+    };
+    return VinettePanel;
 }(React.Component));
 var ShowPanel = /** @class */ (function (_super) {
     __extends(ShowPanel, _super);
@@ -129437,7 +129454,7 @@ var LeftPanel = /** @class */ (function (_super) {
                 React.createElement(SubLightingPanel, { setProperty: this.props.setProperty, lightingData: this.props.observerData.lighting, uiData: this.props.observerData.ui }),
                 React.createElement(ColorAdjustPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(BloomPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
-                React.createElement(SSAOPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
+                React.createElement(VinettePanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(ShowPanel, { setProperty: this.props.setProperty, showData: this.props.observerData.show, uiData: this.props.observerData.ui }))));
     };
     return LeftPanel;
@@ -133073,7 +133090,8 @@ var Viewer = /** @class */ (function () {
         var assets = {
             'bloom': new Asset('bloom', 'script', { url: getAssetPath('effect/bloom.js') }),
             'brightnesscontrast': new Asset('brightnesscontrast', 'script', { url: getAssetPath('effect/brightnesscontrast.js') }),
-            'huesaturation': new Asset('huesaturation', 'script', { url: getAssetPath('effect/huesaturation.js') })
+            'huesaturation': new Asset('huesaturation', 'script', { url: getAssetPath('effect/huesaturation.js') }),
+            'vignette': new Asset('vignette', 'script', { url: getAssetPath('effect/vignette.js') })
         };
         var assetListLoader = new AssetListLoader(Object.values(assets), app.assets);
         assetListLoader.load(function () {
@@ -133305,6 +133323,10 @@ var Viewer = /** @class */ (function () {
             'scripts.huesaturation.enabled': this.setHueSaturationEnabled.bind(this),
             'scripts.huesaturation.hue': this.setHue.bind(this),
             'scripts.huesaturation.saturation': this.setSaturation.bind(this),
+            // vignette
+            'scripts.vignette.enabled': this.setVignetteEnabled.bind(this),
+            'scripts.vignette.offset': this.setVignetteOffset.bind(this),
+            'scripts.vignette.darkness': this.setVignetteDarkness.bind(this),
             'scene.variant.selected': this.setSelectedVariant.bind(this)
         };
         // register control events
@@ -134269,6 +134291,25 @@ var Viewer = /** @class */ (function () {
         }
         this.renderNextFrame();
     };
+    Viewer.prototype.setVignetteEnabled = function (value) {
+        this.setVignetteApply();
+    };
+    Viewer.prototype.setVignetteOffset = function (value) {
+        this.setVignetteApply();
+    };
+    Viewer.prototype.setVignetteDarkness = function (value) {
+        this.setVignetteApply();
+    };
+    Viewer.prototype.setVignetteApply = function () {
+        var enabled = this.observer.get('scripts.vignette.enabled');
+        this.camera.script.destroy('vignette');
+        if (enabled) {
+            this.camera.script.create('vignette', {
+                attributes: this.observer.get('scripts.vignette')
+            });
+        }
+        this.renderNextFrame();
+    };
     //#endregion
     //#region Util
     // extract query params. taken from https://stackoverflow.com/a/21152762
@@ -134413,6 +134454,11 @@ var observerData = {
             samples: 16,
             brightness: 0,
             downscale: 1
+        },
+        vignette: {
+            enabled: true,
+            offset: 0.9,
+            darkness: 0.8,
         }
     },
     spinner: false,
