@@ -129225,6 +129225,7 @@ var ScenePanel = /** @class */ (function (_super) {
         var scene = this.props.sceneData;
         var variantListOptions = JSON.parse(scene.variants.list).map(function (variant) { return ({ v: variant, t: variant }); });
         return (React.createElement(Panel$1, { headerText: 'SCENE', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true },
+            React.createElement(Detail, { label: 'NAME', value: scene.name }),
             React.createElement(Detail, { label: 'Load time', value: scene.loadTime }),
             React.createElement(Detail, { label: 'Meshes', value: scene.meshCount }),
             React.createElement(Detail, { label: 'Verts', value: scene.vertexCount }),
@@ -129246,7 +129247,7 @@ var CameraPanel = /** @class */ (function (_super) {
     };
     CameraPanel.prototype.render = function () {
         var props = this.props;
-        return (React.createElement(Panel$1, { headerText: 'CAMERA', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true },
+        return (React.createElement(Panel$1, { headerText: 'CAMERA', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
             React.createElement(Slider, { label: 'Fov', precision: 0, min: 35, max: 150, value: props.observerData.show.fov, setProperty: function (value) { return props.setProperty('show.fov', value); } }),
             React.createElement(Select, { label: 'Tonemap', type: 'string', options: ['Linear', 'Filmic', 'Hejl', 'ACES'].map(function (v) { return ({ v: v, t: v }); }), value: props.observerData.lighting.tonemapping, setProperty: function (value) { return props.setProperty('lighting.tonemapping', value); } }),
             React.createElement(Select, { label: 'Pixel Scale', value: props.observerData.render.pixelScale, type: 'number', options: [1, 2, 4, 8, 16].map(function (v) { return ({ v: v, t: Number(v).toString() }); }), setProperty: function (value) { return props.setProperty('render.pixelScale', value); } }),
@@ -129266,7 +129267,7 @@ var EnvironmentPanel = /** @class */ (function (_super) {
     };
     EnvironmentPanel.prototype.render = function () {
         var props = this.props;
-        return (React.createElement(Panel$1, { headerText: 'ENVIRONMENT', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true },
+        return (React.createElement(Panel$1, { headerText: 'ENVIRONMENT', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
             React.createElement(Select, { label: 'Environment', type: 'string', options: JSON.parse(props.lightingData.env.options), value: props.lightingData.env.value, setProperty: function (value) { return props.setProperty('lighting.env.value', value); } }),
             React.createElement(Select, { label: 'Skybox Level', type: 'number', options: [0, 1, 2, 3, 4, 5, 6].map(function (v) { return ({ v: v, t: v === 0 ? 'Disable' : Number(v - 1).toString() }); }), value: props.lightingData.env.skyboxMip, setProperty: function (value) { return props.setProperty('lighting.env.skyboxMip', value); } }),
             React.createElement(Slider, { label: 'Exposure', precision: 2, min: -6, max: 6, value: props.lightingData.env.exposure, setProperty: function (value) { return props.setProperty('lighting.env.exposure', value); } }),
@@ -129284,7 +129285,7 @@ var LightingPanel = /** @class */ (function (_super) {
     };
     LightingPanel.prototype.render = function () {
         var props = this.props;
-        return (React.createElement(Panel$1, { headerText: 'LIGHTING', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true },
+        return (React.createElement(Panel$1, { headerText: 'LIGHTING', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
             React.createElement(Slider, { label: 'Intencity', precision: 2, min: 0, max: 6, value: props.lightingData.mainLight.intencity, setProperty: function (value) { return props.setProperty('lighting.mainLight.intencity', value); } }),
             React.createElement(Slider, { label: 'Color_R', precision: 0, min: 0, max: 255, value: props.lightingData.mainLight.color_r, setProperty: function (value) { return props.setProperty('lighting.mainLight.color_r', value); } }),
             React.createElement(Slider, { label: 'Color_G', precision: 0, min: 0, max: 255, value: props.lightingData.mainLight.color_g, setProperty: function (value) { return props.setProperty('lighting.mainLight.color_g', value); } }),
@@ -129308,7 +129309,7 @@ var SubLightingPanel = /** @class */ (function (_super) {
     };
     SubLightingPanel.prototype.render = function () {
         var props = this.props;
-        return (React.createElement(Panel$1, { headerText: 'SUB LIGHTING', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true },
+        return (React.createElement(Panel$1, { headerText: 'SUB LIGHTING', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
             React.createElement(Slider, { label: 'Intencity', precision: 2, min: 0, max: 6, value: props.lightingData.subLight.intencity, setProperty: function (value) { return props.setProperty('lighting.subLight.intencity', value); } }),
             React.createElement(Slider, { label: 'Color_R', precision: 0, min: 0, max: 255, value: props.lightingData.subLight.color_r, setProperty: function (value) { return props.setProperty('lighting.subLight.color_r', value); } }),
             React.createElement(Slider, { label: 'Color_G', precision: 0, min: 0, max: 255, value: props.lightingData.subLight.color_g, setProperty: function (value) { return props.setProperty('lighting.subLight.color_g', value); } }),
@@ -129329,7 +129330,7 @@ var SSAOPanel = /** @class */ (function (_super) {
     };
     SSAOPanel.prototype.render = function () {
         var props = this.props;
-        return (React.createElement(Panel$1, { headerText: 'SSAO', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true },
+        return (React.createElement(Panel$1, { headerText: 'SSAO', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
             React.createElement(Toggle, { label: 'Enable', value: props.scripts.ssao.enabled, setProperty: function (value) { return props.setProperty('scripts.ssao.enabled', value); } }),
             React.createElement(Slider, { label: 'Radius', precision: 2, min: 0, max: 10, value: props.scripts.ssao.radius, setProperty: function (value) { return props.setProperty('scripts.ssao.radius', value); } }),
             React.createElement(Slider, { label: 'Samples', precision: 2, min: 0, max: 32, value: props.scripts.ssao.samples, setProperty: function (value) { return props.setProperty('scripts.ssao.samples', value); } }),
@@ -129348,7 +129349,7 @@ var BloomPanel = /** @class */ (function (_super) {
     };
     BloomPanel.prototype.render = function () {
         var props = this.props;
-        return (React.createElement(Panel$1, { headerText: 'BLOOM', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true },
+        return (React.createElement(Panel$1, { headerText: 'BLOOM', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
             React.createElement(Toggle, { label: 'Enable', value: props.scripts.bloom.enabled, setProperty: function (value) { return props.setProperty('scripts.bloom.enabled', value); } }),
             React.createElement(Slider, { label: 'Intensity', precision: 2, min: 0, max: 1, value: props.scripts.bloom.bloomIntensity, setProperty: function (value) { return props.setProperty('scripts.bloom.bloomIntensity', value); } }),
             React.createElement(Slider, { label: 'Threshold', precision: 2, min: 0, max: 1, value: props.scripts.bloom.bloomThreshold, setProperty: function (value) { return props.setProperty('scripts.bloom.bloomThreshold', value); } }),
@@ -129366,7 +129367,7 @@ var ShowPanel = /** @class */ (function (_super) {
     };
     ShowPanel.prototype.render = function () {
         var props = this.props;
-        return (React.createElement(Panel$1, { headerText: 'DEBUG', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true },
+        return (React.createElement(Panel$1, { headerText: 'DEBUG', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
             React.createElement(Toggle, { label: 'Grid', value: props.showData.grid, setProperty: function (value) { return props.setProperty('show.grid', value); } }),
             React.createElement(Toggle, { label: 'Wireframe', value: props.showData.wireframe, setProperty: function (value) { return props.setProperty('show.wireframe', value); } }),
             React.createElement(Toggle, { label: 'Axes', value: props.showData.axes, setProperty: function (value) { return props.setProperty('show.axes', value); } }),
@@ -129431,10 +129432,12 @@ var LoadControls = function (props) {
         var level = document.getElementById('input-level').ui.value;
         var asset_path = "https://raw.githubusercontent.com/sehyun-zigbang/zigbang-zed-viewer/feature/playcanvas-based/assets";
         var model_path = "".concat(asset_path, "/glTF/").concat(danjiId, "/").concat(roomTypeId);
-        var name_glTF = "".concat(danjiId, "_").concat(roomTypeId, "_").concat(level, ".gltf");
-        var name_bin = "".concat(danjiId, "_").concat(roomTypeId, "_").concat(level, ".bin");
+        var model_name = "".concat(danjiId, "_").concat(roomTypeId, "_").concat(level);
+        var name_glTF = "".concat(model_name, ".gltf");
+        var name_bin = "".concat(model_name, ".bin");
         var url_glTF = "".concat(model_path, "/").concat(name_glTF);
         var url_bin = "".concat(model_path, "/").concat(name_bin);
+        props.setProperty('scene.name', model_name);
         var viewer = window.viewer;
         var loadList = [];
         loadList.push({
@@ -133090,9 +133093,9 @@ var Viewer = /** @class */ (function () {
             });
             // Depth layer is where the framebuffer is copied to a texture to be used in the following layers.
             // Move the depth layer to take place after World and Skydome layers, to capture both of them.
-            var depthLayer = app.scene.layers.getLayerById(LAYERID_DEPTH);
-            app.scene.layers.remove(depthLayer);
-            app.scene.layers.insertOpaque(depthLayer, 2);
+            // const depthLayer = app.scene.layers.getLayerById(pc.LAYERID_DEPTH);
+            // app.scene.layers.remove(depthLayer);
+            // app.scene.layers.insertOpaque(depthLayer, 2);
             // create the orbit camera
             var camera = new Entity("Camera");
             camera.addComponent("camera", {
@@ -133336,6 +133339,7 @@ var Viewer = /** @class */ (function () {
             };
         });
         // hierarchy
+        // 추후 이 부분 지우면 패널 제거 가능
         this.observer.set('scene.nodes', JSON.stringify(graph));
         // mesh stats
         this.observer.set('scene.meshCount', meshCount);
@@ -134316,7 +134320,8 @@ var observerData = {
         variants: {
             list: '[]'
         },
-        loadTime: null
+        loadTime: null,
+        name: null
     },
     scripts: {
         bloom: {
