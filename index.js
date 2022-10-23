@@ -129249,7 +129249,9 @@ var CameraPanel = /** @class */ (function (_super) {
         var props = this.props;
         return (React.createElement(Panel$1, { headerText: 'CAMERA', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
             React.createElement(Slider, { label: 'Fov', precision: 0, min: 35, max: 150, value: props.observerData.show.fov, setProperty: function (value) { return props.setProperty('show.fov', value); } }),
-            React.createElement(Select, { label: 'Tonemap', type: 'string', options: ['Linear', 'Filmic', 'Hejl', 'ACES'].map(function (v) { return ({ v: v, t: v }); }), value: props.observerData.lighting.tonemapping, setProperty: function (value) { return props.setProperty('lighting.tonemapping', value); } })));
+            React.createElement(Select, { label: 'Tonemap', type: 'string', options: ['Linear', 'Filmic', 'Hejl', 'ACES'].map(function (v) { return ({ v: v, t: v }); }), value: props.observerData.lighting.tonemapping, setProperty: function (value) { return props.setProperty('lighting.tonemapping', value); } }),
+            React.createElement(Toggle, { label: 'FXAA', value: props.observerData.scripts.fxaa.enabled, setProperty: function (value) { return props.setProperty('scripts.fxaa.enabled', value); } }),
+            React.createElement(Toggle, { label: 'Post Process', value: props.observerData.show.postprocess, setProperty: function (value) { return props.setProperty('show.postprocess', value); } })));
     };
     return CameraPanel;
 }(React.Component));
@@ -132739,7 +132741,6 @@ var Viewer = /** @class */ (function () {
         this.canvas = canvas;
         this.observer = observer;
         this.init_app();
-        var app = this.app;
         this.init_camera();
         this.init_light();
         this.init_skyBox();
@@ -132750,14 +132751,12 @@ var Viewer = /** @class */ (function () {
             _this.resizeCanvas();
         });
         this.resizeCanvas();
-        app.start();
+        this.app.start();
     }
-    //-----------------------------------
-    //#region App
     Viewer.prototype.init_app = function () {
         var canvas = this.canvas;
         // create the application
-        this.app = new Application(canvas, {
+        var app = this.app = new Application(canvas, {
             mouse: new Mouse(canvas),
             touch: new TouchDevice(canvas),
             graphicsDeviceOptions: {
@@ -132770,6 +132769,8 @@ var Viewer = /** @class */ (function () {
                 //preserveDrawingBuffer: true
             }
         });
+        app.autoRender = false;
+        this.prevCameraMat = new Mat4();
     };
     Viewer.prototype.init_camera = function () {
         var _this = this;
@@ -132782,7 +132783,7 @@ var Viewer = /** @class */ (function () {
             frustumCulling: true,
             clearColor: new Color(0, 0, 0, 0)
         });
-        //camera.camera.requestSceneColorMap(true);
+        camera.camera.requestSceneColorMap(true);
         camera.camera.requestSceneDepthMap(true);
         // Create OrbitCamera Component
         this.orbitCamera = new OrbitCamera(camera, 0.25);
@@ -132793,6 +132794,7 @@ var Viewer = /** @class */ (function () {
         this.app.root.addChild(camera);
         // Create Post-Process Component
         var assets = {
+            "fxaa": new Asset('fxaa', 'script', { url: getAssetPath('effect/fxaa.js') }),
             'bloom': new Asset('bloom', 'script', { url: getAssetPath('effect/bloom.js') }),
             'brightnesscontrast': new Asset('brightnesscontrast', 'script', { url: getAssetPath('effect/brightnesscontrast.js') }),
             'huesaturation': new Asset('huesaturation', 'script', { url: getAssetPath('effect/huesaturation.js') }),
@@ -132802,6 +132804,7 @@ var Viewer = /** @class */ (function () {
         };
         var assetListLoader = new AssetListLoader(Object.values(assets), app.assets);
         assetListLoader.load(function () {
+            observer.set('show.postprocess', observer.get('show.postprocess'));
             camera.addComponent("script");
             Object.keys(observer.get('scripts')).forEach(function (key) {
                 camera.script.create(key, {
@@ -132809,6 +132812,9 @@ var Viewer = /** @class */ (function () {
                 });
             });
             var controlEvents = {
+                'show.postprocess': _this.setPostProcessEnabled.bind(_this),
+                // fxaa
+                'scripts.fxaa.enabled': _this.setFxaaEnabled.bind(_this),
                 // bloom
                 'scripts.bloom.enabled': _this.setBloomEnabled.bind(_this),
                 'scripts.bloom.bloomIntensity': _this.setBloomIntensity.bind(_this),
@@ -132841,6 +132847,7 @@ var Viewer = /** @class */ (function () {
                 observer.on("".concat(e, ":set"), controlEvents[e]);
                 //observer.set(e, observer.get(e), false, false, true);
             });
+            _this.renderNextFrame();
         });
         // store app things
         this.cameraFocusBBox = null;
@@ -132865,6 +132872,7 @@ var Viewer = /** @class */ (function () {
                 var len3 = intersection.halfExtents.length();
                 if ((Math.abs(len3 - len1) / len1 < 0.1) &&
                     (Math.abs(len3 - len2) / len2 < 0.1)) {
+                    this.renderNextFrame();
                     return;
                 }
             }
@@ -132892,6 +132900,7 @@ var Viewer = /** @class */ (function () {
         var light = this.light;
         light.light.shadowDistance = distance * 2;
         this.cameraFocusBBox = bbox;
+        this.renderNextFrame();
     };
     Viewer.prototype.calcSceneBounds = function () {
         return this.meshInstances.length ?
@@ -133130,6 +133139,7 @@ var Viewer = /** @class */ (function () {
         var canvasSize = this.getCanvasSize();
         device.maxPixelRatio = window.devicePixelRatio;
         this.app.resizeCanvas(canvasSize.width, canvasSize.height);
+        this.renderNextFrame();
     };
     //#endregion
     //-----------------------------------
@@ -133138,17 +133148,30 @@ var Viewer = /** @class */ (function () {
         var _a;
         // update the orbit camera
         this.orbitCamera.update(deltaTime);
-        if ((_a = this.camera.script) === null || _a === void 0 ? void 0 : _a.has('bokeh')) {
-            var fPoint = this.orbitCamera.focalPoint.snaptoPoint.clone();
-            var cPoint = this.orbitCamera.cameraNode.getPosition();
-            var focus = -fPoint.sub(cPoint).length();
-            //console.log(focus);
-            this.setBokehFocus(focus);
-        }
-        if (this.observer.get('show.depth')) {
-            if (this.observer.get('scripts.bokeh.enabled') || this.observer.get('scripts.ssao.enabled')) {
-                // @ts-ignore engine-tsd
-                this.app.drawDepthTexture(0.7, -0.7, 0.5, 0.5);
+        var maxdiff = function (a, b) {
+            var result = 0;
+            for (var i = 0; i < 16; ++i) {
+                result = Math.max(result, Math.abs(a.data[i] - b.data[i]));
+            }
+            return result;
+        };
+        // if the camera has moved since the last render
+        var cameraWorldTransform = this.camera.getWorldTransform();
+        if (maxdiff(cameraWorldTransform, this.prevCameraMat) > 1e-04) {
+            this.prevCameraMat.copy(cameraWorldTransform);
+            this.renderNextFrame();
+            if ((_a = this.camera.script) === null || _a === void 0 ? void 0 : _a.has('bokeh')) {
+                var fPoint = this.orbitCamera.focalPoint.snaptoPoint.clone();
+                var cPoint = this.orbitCamera.cameraNode.getPosition();
+                var focus = -fPoint.sub(cPoint).length();
+                //console.log(focus);
+                this.setBokehFocus(focus);
+            }
+            if (this.observer.get('show.depth')) {
+                if (this.observer.get('scripts.bokeh.enabled') || this.observer.get('scripts.ssao.enabled')) {
+                    // @ts-ignore engine-tsd
+                    this.app.drawDepthTexture(0.7, -0.7, 0.5, 0.5);
+                }
             }
         }
     };
@@ -133577,93 +133600,114 @@ var Viewer = /** @class */ (function () {
     //#region Set Property
     Viewer.prototype.setStats = function (show) {
         this.miniStats.enabled = show;
+        this.renderNextFrame();
     };
     Viewer.prototype.setFov = function (fov) {
         this.camera.camera.fov = fov;
+        this.renderNextFrame();
     };
     Viewer.prototype.setEnvRotation = function (factor) {
         // update skybox
         var rot = new Quat();
         rot.setFromEulerAngles(0, factor, 0);
         this.app.scene.skyboxRotation = rot;
+        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingIntencity = function (factor) {
         this.light.light.intensity = factor;
+        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingColor_r = function (value) {
         var color = this.light.light.color;
         color.r = value / 255;
         this.light.light.color = color;
+        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingColor_g = function (value) {
         var color = this.light.light.color;
         color.g = value / 255;
         this.light.light.color = color;
+        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingColor_b = function (value) {
         var color = this.light.light.color;
         color.b = value / 255;
         this.light.light.color = color;
+        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingRotation_x = function (factor) {
         var angle = this.light.getLocalEulerAngles();
         angle.x = factor;
         this.light.setLocalEulerAngles(angle);
+        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingRotation_y = function (factor) {
         var angle = this.light.getLocalEulerAngles();
         angle.y = factor;
         this.light.setLocalEulerAngles(angle);
+        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightingRotation_z = function (factor) {
         var angle = this.light.getLocalEulerAngles();
         angle.z = factor;
         this.light.setLocalEulerAngles(angle);
+        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightShadow = function (enable) {
         this.light.light.castShadows = enable;
+        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightShadowIntencity = function (value) {
         this.light.light.shadowIntensity = value;
+        this.renderNextFrame();
     };
     Viewer.prototype.setMainLightShadowResulution = function (value) {
         this.light.light.shadowResolution = value;
+        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingIntencity = function (factor) {
         this.sublight.light.intensity = factor;
+        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingColor_r = function (value) {
         var color = this.sublight.light.color;
         color.r = value / 255;
         this.sublight.light.color = color;
+        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingColor_g = function (value) {
         var color = this.sublight.light.color;
         color.g = value / 255;
         this.sublight.light.color = color;
+        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingColor_b = function (value) {
         var color = this.sublight.light.color;
         color.b = value / 255;
         this.sublight.light.color = color;
+        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingRotation_x = function (factor) {
         var angle = this.sublight.getLocalEulerAngles();
         angle.x = factor;
         this.sublight.setLocalEulerAngles(angle);
+        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingRotation_y = function (factor) {
         var angle = this.sublight.getLocalEulerAngles();
         angle.y = factor;
         this.sublight.setLocalEulerAngles(angle);
+        this.renderNextFrame();
     };
     Viewer.prototype.setSubLightingRotation_z = function (factor) {
         var angle = this.sublight.getLocalEulerAngles();
         angle.z = factor;
         this.sublight.setLocalEulerAngles(angle);
+        this.renderNextFrame();
     };
     Viewer.prototype.setEnvExposure = function (factor) {
         this.app.scene.skyboxIntensity = Math.pow(2, factor);
+        this.renderNextFrame();
     };
     Viewer.prototype.setTonemapping = function (tonemapping) {
         var mapping = {
@@ -133673,80 +133717,120 @@ var Viewer = /** @class */ (function () {
             ACES: TONEMAP_ACES
         };
         this.app.scene.toneMapping = mapping.hasOwnProperty(tonemapping) ? mapping[tonemapping] : TONEMAP_ACES;
+        this.renderNextFrame();
     };
     Viewer.prototype.setBackgroundColor = function (color) {
         var cnv = function (value) { return Math.max(0, Math.min(255, Math.floor(value * 255))); };
         document.getElementById('canvas-wrapper').style.backgroundColor = "rgb(".concat(cnv(color.r), ", ").concat(cnv(color.g), ", ").concat(cnv(color.b), ")");
+        this.renderNextFrame();
     };
     Viewer.prototype.setSkyboxMip = function (mip) {
         this.app.scene.layers.getLayerById(LAYERID_SKYBOX).enabled = (mip !== 0);
         this.app.scene.skyboxMip = mip - 1;
+        this.renderNextFrame();
+    };
+    Viewer.prototype.setPostProcessEnabled = function (value) {
+        console.log('a');
+        this.setBloomEnabled(value);
+        this.setBokehEnabled(value);
+        this.setSSAOEnabled(value);
+        this.setVignetteEnabled(value);
+        this.setHueSaturationEnabled(value);
+        this.setBrightnessContrastEnabled(value);
+        this.renderNextFrame();
+    };
+    Viewer.prototype.setFxaaEnabled = function (value) {
+        this.camera.script.get('fxaa').fire('state', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setBloomEnabled = function (value) {
-        this.camera.script.get('bloom').fire('state', value);
+        console.log('b');
+        this.camera.script.get('bloom').fire('state', value && this.observer.get("show.postprocess"));
+        this.renderNextFrame();
     };
     Viewer.prototype.setBloomIntensity = function (value) {
         this.camera.script.get('bloom').fire('attr', 'bloomIntensity', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setBloomThreshold = function (value) {
         this.camera.script.get('bloom').fire('attr', 'bloomThreshold', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setBlurAmount = function (value) {
         this.camera.script.get('bloom').fire('attr', 'blurAmount', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setBrightnessContrastEnabled = function (value) {
-        this.camera.script.get('brightnesscontrast').fire('state', value);
+        this.camera.script.get('brightnesscontrast').fire('state', value && this.observer.get("show.postprocess"));
+        this.renderNextFrame();
     };
     Viewer.prototype.setBrightness = function (value) {
         this.camera.script.get('brightnesscontrast').fire('attr', 'brightness', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setContrast = function (value) {
         this.camera.script.get('brightnesscontrast').fire('attr', 'contrast', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setHueSaturationEnabled = function (value) {
-        this.camera.script.get('huesaturation').fire('state', value);
+        this.camera.script.get('huesaturation').fire('state', value && this.observer.get("show.postprocess"));
+        this.renderNextFrame();
     };
     Viewer.prototype.setHue = function (value) {
         this.camera.script.get('huesaturation').fire('attr', 'hue', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setSaturation = function (value) {
         this.camera.script.get('huesaturation').fire('attr', 'saturation', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setVignetteEnabled = function (value) {
-        this.camera.script.get('vignette').fire('state', value);
+        this.camera.script.get('vignette').fire('state', value && this.observer.get("show.postprocess"));
+        this.renderNextFrame();
     };
     Viewer.prototype.setVignetteOffset = function (value) {
         this.camera.script.get('vignette').fire('attr', 'offset', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setVignetteDarkness = function (value) {
         this.camera.script.get('vignette').fire('attr', 'darkness', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setBokehEnabled = function (value) {
-        this.camera.script.get('bokeh').fire('state', value);
+        this.camera.script.get('bokeh').fire('state', value && this.observer.get("show.postprocess"));
+        this.renderNextFrame();
     };
     Viewer.prototype.setBokehMaxBlur = function (value) {
         this.camera.script.get('bokeh').fire('attr', 'maxBlur', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setBokehAperture = function (value) {
         this.camera.script.get('bokeh').fire('attr', 'aperture', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setBokehFocus = function (value) {
         this.camera.script.get('bokeh').fire('attr', 'focus', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setSSAOEnabled = function (value) {
-        this.camera.script.get('ssao').fire('state', value);
+        this.camera.script.get('ssao').fire('state', value && this.observer.get("show.postprocess"));
+        this.renderNextFrame();
     };
     Viewer.prototype.setSSAORadius = function (value) {
         this.camera.script.get('ssao').fire('attr', 'radius', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setSSAOSamples = function (value) {
         this.camera.script.get('ssao').fire('attr', 'samples', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setSSAOBrightness = function (value) {
         this.camera.script.get('ssao').fire('attr', 'brightness', value);
+        this.renderNextFrame();
     };
     Viewer.prototype.setSSAODownscale = function (value) {
         this.camera.script.get('ssao').fire('attr', 'downscale', value);
+        this.renderNextFrame();
     };
     //#endregion
     //#region Util
@@ -133777,6 +133861,13 @@ var Viewer = /** @class */ (function () {
             }
         }
     };
+    //#endregion
+    Viewer.prototype.renderNextFrame = function () {
+        this.app.renderNextFrame = true;
+        // if (this.multiframe) {
+        //     this.multiframe.moved();
+        // }
+    };
     return Viewer;
 }());
 
@@ -133787,7 +133878,8 @@ var observerData = {
     show: {
         stats: false,
         depth: false,
-        fov: 45
+        fov: 45,
+        postprocess: true,
     },
     lighting: {
         direct: 0.6,
@@ -133859,6 +133951,9 @@ var observerData = {
         name: null
     },
     scripts: {
+        fxaa: {
+            enabled: true,
+        },
         brightnesscontrast: {
             enabled: true,
             brightness: -0.1,
@@ -133885,7 +133980,7 @@ var observerData = {
             enabled: true,
             radius: 5,
             samples: 16,
-            brightness: 0.3,
+            brightness: 0.2,
             downscale: 1
         },
         vignette: {
