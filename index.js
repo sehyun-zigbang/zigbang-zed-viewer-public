@@ -129316,7 +129316,7 @@ var SubLightingPanel = /** @class */ (function (_super) {
     };
     return SubLightingPanel;
 }(React.Component));
-/** @class */ ((function (_super) {
+var SSAOPanel = /** @class */ (function (_super) {
     __extends(SSAOPanel, _super);
     function SSAOPanel() {
         return _super !== null && _super.apply(this, arguments) || this;
@@ -129334,7 +129334,7 @@ var SubLightingPanel = /** @class */ (function (_super) {
             React.createElement(Select, { label: 'Downscale', value: props.scripts.ssao.downscale, type: 'number', options: [{ v: 1, t: 'None' }, { v: 2, t: '50%' }, { v: '4', t: '25%' }], setProperty: function (value) { return props.setProperty('scripts.ssao.downscale', value); } })));
     };
     return SSAOPanel;
-})(React.Component));
+}(React.Component));
 var BloomPanel = /** @class */ (function (_super) {
     __extends(BloomPanel, _super);
     function BloomPanel() {
@@ -129402,8 +129402,8 @@ var DOFPanel = /** @class */ (function (_super) {
         var props = this.props;
         return (React.createElement(Panel$1, { headerText: 'DOF', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
             React.createElement(Toggle, { label: 'Enable', value: props.scripts.bokeh.enabled, setProperty: function (value) { return props.setProperty('scripts.bokeh.enabled', value); } }),
-            React.createElement(Slider, { label: 'MaxBlur', precision: 2, min: 0, max: 0.1, value: props.scripts.bokeh.maxBlur, setProperty: function (value) { return props.setProperty('scripts.bokeh.maxBlur', value); } }),
-            React.createElement(Slider, { label: 'Aperture', precision: 2, min: 0, max: 0.2, value: props.scripts.bokeh.aperture, setProperty: function (value) { return props.setProperty('scripts.bokeh.aperture', value); } })));
+            React.createElement(Slider, { label: 'MaxBlur', precision: 3, min: 0, max: 0.1, value: props.scripts.bokeh.maxBlur, setProperty: function (value) { return props.setProperty('scripts.bokeh.maxBlur', value); } }),
+            React.createElement(Slider, { label: 'Aperture', precision: 3, min: 0, max: 0.2, value: props.scripts.bokeh.aperture, setProperty: function (value) { return props.setProperty('scripts.bokeh.aperture', value); } })));
     };
     return DOFPanel;
 }(React.Component));
@@ -129418,7 +129418,8 @@ var ShowPanel = /** @class */ (function (_super) {
     ShowPanel.prototype.render = function () {
         var props = this.props;
         return (React.createElement(Panel$1, { headerText: 'DEBUG', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
-            React.createElement(Toggle, { label: 'Stats', value: props.showData.stats, setProperty: function (value) { return props.setProperty('show.stats', value); } })));
+            React.createElement(Toggle, { label: 'Stats', value: props.showData.stats, setProperty: function (value) { return props.setProperty('show.stats', value); } }),
+            React.createElement(Toggle, { label: 'Depth', value: props.showData.depth, setProperty: function (value) { return props.setProperty('show.depth', value); } })));
     };
     return ShowPanel;
 }(React.Component));
@@ -129464,6 +129465,7 @@ var LeftPanel = /** @class */ (function (_super) {
                 React.createElement(BloomPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(DOFPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(VinettePanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
+                React.createElement(SSAOPanel, { setProperty: this.props.setProperty, scripts: this.props.observerData.scripts }),
                 React.createElement(ShowPanel, { setProperty: this.props.setProperty, showData: this.props.observerData.show }))));
     };
     return LeftPanel;
@@ -132781,6 +132783,7 @@ var Viewer = /** @class */ (function () {
             clearColor: new Color(0, 0, 0, 0)
         });
         //camera.camera.requestSceneColorMap(true);
+        camera.camera.requestSceneDepthMap(true);
         // Create OrbitCamera Component
         this.orbitCamera = new OrbitCamera(camera, 0.25);
         this.orbitCameraInputMouse = new OrbitCameraInputMouse(app, this.orbitCamera);
@@ -132793,8 +132796,9 @@ var Viewer = /** @class */ (function () {
             'bloom': new Asset('bloom', 'script', { url: getAssetPath('effect/bloom.js') }),
             'brightnesscontrast': new Asset('brightnesscontrast', 'script', { url: getAssetPath('effect/brightnesscontrast.js') }),
             'huesaturation': new Asset('huesaturation', 'script', { url: getAssetPath('effect/huesaturation.js') }),
+            'vignette': new Asset('vignette', 'script', { url: getAssetPath('effect/vignette.js') }),
             'bokeh': new Asset('bokeh', 'script', { url: getAssetPath('effect/bokeh.js') }),
-            'vignette': new Asset('vignette', 'script', { url: getAssetPath('effect/vignette.js') })
+            'ssao': new Asset('ssao', 'script', { url: getAssetPath('effect/ssao.js') })
         };
         var assetListLoader = new AssetListLoader(Object.values(assets), app.assets);
         assetListLoader.load(function () {
@@ -132810,7 +132814,7 @@ var Viewer = /** @class */ (function () {
                 'scripts.bloom.bloomIntensity': _this.setBloomIntensity.bind(_this),
                 'scripts.bloom.bloomThreshold': _this.setBloomThreshold.bind(_this),
                 'scripts.bloom.blurAmount': _this.setBlurAmount.bind(_this),
-                // color adjust
+                // // color adjust
                 'scripts.brightnesscontrast.enabled': _this.setBrightnessContrastEnabled.bind(_this),
                 'scripts.brightnesscontrast.brightness': _this.setBrightness.bind(_this),
                 'scripts.brightnesscontrast.contrast': _this.setContrast.bind(_this),
@@ -132821,16 +132825,21 @@ var Viewer = /** @class */ (function () {
                 'scripts.bokeh.enabled': _this.setBokehEnabled.bind(_this),
                 'scripts.bokeh.maxBlur': _this.setBokehMaxBlur.bind(_this),
                 'scripts.bokeh.aperture': _this.setBokehAperture.bind(_this),
-                'scripts.bokeh.focus': _this.setBokehFocus.bind(_this),
-                // vignette
+                // // vignette
                 'scripts.vignette.enabled': _this.setVignetteEnabled.bind(_this),
                 'scripts.vignette.offset': _this.setVignetteOffset.bind(_this),
                 'scripts.vignette.darkness': _this.setVignetteDarkness.bind(_this),
+                //  // ssao
+                'scripts.ssao.enabled': _this.setSSAOEnabled.bind(_this),
+                'scripts.ssao.radius': _this.setSSAORadius.bind(_this),
+                'scripts.ssao.samples': _this.setSSAOSamples.bind(_this),
+                'scripts.ssao.brightness': _this.setSSAOBrightness.bind(_this),
+                'scripts.ssao.downscale': _this.setSSAODownscale.bind(_this)
             };
             // register control events
             Object.keys(controlEvents).forEach(function (e) {
                 observer.on("".concat(e, ":set"), controlEvents[e]);
-                observer.set(e, observer.get(e), false, false, true);
+                //observer.set(e, observer.get(e), false, false, true);
             });
         });
         // store app things
@@ -133126,8 +133135,22 @@ var Viewer = /** @class */ (function () {
     //-----------------------------------
     //#region Life Cycle
     Viewer.prototype.update = function (deltaTime) {
+        var _a;
         // update the orbit camera
         this.orbitCamera.update(deltaTime);
+        if ((_a = this.camera.script) === null || _a === void 0 ? void 0 : _a.has('bokeh')) {
+            var fPoint = this.orbitCamera.focalPoint.snaptoPoint.clone();
+            var cPoint = this.orbitCamera.cameraNode.getPosition();
+            var focus = -fPoint.sub(cPoint).length();
+            //console.log(focus);
+            this.setBokehFocus(focus);
+        }
+        if (this.observer.get('show.depth')) {
+            if (this.observer.get('scripts.bokeh.enabled') || this.observer.get('scripts.ssao.enabled')) {
+                // @ts-ignore engine-tsd
+                this.app.drawDepthTexture(0.7, -0.7, 0.5, 0.5);
+            }
+        }
     };
     Viewer.prototype.onFrameend = function () {
         if (this.firstFrame) {
@@ -133226,10 +133249,6 @@ var Viewer = /** @class */ (function () {
         this.updateSceneInfo();
         // construct a list of meshInstances so we can quickly access them when configuring wireframe rendering etc.
         this.updateMeshInstanceList();
-        // if no meshes are loaded then enable skeleton rendering so user can see something
-        if (this.meshInstances.length === 0) {
-            this.observer.set('show.skeleton', true);
-        }
         // we can't refocus the camera here because the scene hierarchy only gets updated
         // during render. we must instead set a flag, wait for a render to take place and
         // then focus the camera.
@@ -133664,100 +133683,70 @@ var Viewer = /** @class */ (function () {
         this.app.scene.skyboxMip = mip - 1;
     };
     Viewer.prototype.setBloomEnabled = function (value) {
-        this.setBloomApply();
+        this.camera.script.get('bloom').fire('state', value);
     };
     Viewer.prototype.setBloomIntensity = function (value) {
-        this.setBloomApply();
+        this.camera.script.get('bloom').fire('attr', 'bloomIntensity', value);
     };
     Viewer.prototype.setBloomThreshold = function (value) {
-        this.setBloomApply();
+        this.camera.script.get('bloom').fire('attr', 'bloomThreshold', value);
     };
     Viewer.prototype.setBlurAmount = function (value) {
-        this.setBloomApply();
-    };
-    Viewer.prototype.setBloomApply = function () {
-        var enabled = this.observer.get('scripts.bloom.enabled');
-        this.camera.script.destroy('bloom');
-        if (enabled) {
-            this.camera.script.create('bloom', {
-                attributes: this.observer.get('scripts.bloom')
-            });
-        }
+        this.camera.script.get('bloom').fire('attr', 'blurAmount', value);
     };
     Viewer.prototype.setBrightnessContrastEnabled = function (value) {
-        this.setBrightnessContrastApply();
+        this.camera.script.get('brightnesscontrast').fire('state', value);
     };
     Viewer.prototype.setBrightness = function (value) {
-        this.setBrightnessContrastApply();
+        this.camera.script.get('brightnesscontrast').fire('attr', 'brightness', value);
     };
     Viewer.prototype.setContrast = function (value) {
-        this.setBrightnessContrastApply();
-    };
-    Viewer.prototype.setBrightnessContrastApply = function () {
-        var enabled = this.observer.get('scripts.brightnesscontrast.enabled');
-        this.camera.script.destroy('brightnesscontrast');
-        if (enabled) {
-            this.camera.script.create('brightnesscontrast', {
-                attributes: this.observer.get('scripts.brightnesscontrast')
-            });
-        }
+        this.camera.script.get('brightnesscontrast').fire('attr', 'contrast', value);
     };
     Viewer.prototype.setHueSaturationEnabled = function (value) {
-        this.setHueSaturatioApply();
+        this.camera.script.get('huesaturation').fire('state', value);
     };
     Viewer.prototype.setHue = function (value) {
-        this.setHueSaturatioApply();
+        this.camera.script.get('huesaturation').fire('attr', 'hue', value);
     };
     Viewer.prototype.setSaturation = function (value) {
-        this.setHueSaturatioApply();
-    };
-    Viewer.prototype.setHueSaturatioApply = function () {
-        var enabled = this.observer.get('scripts.huesaturation.enabled');
-        this.camera.script.destroy('huesaturation');
-        if (enabled) {
-            this.camera.script.create('huesaturation', {
-                attributes: this.observer.get('scripts.huesaturation')
-            });
-        }
+        this.camera.script.get('huesaturation').fire('attr', 'saturation', value);
     };
     Viewer.prototype.setVignetteEnabled = function (value) {
-        this.setVignetteApply();
+        this.camera.script.get('vignette').fire('state', value);
     };
     Viewer.prototype.setVignetteOffset = function (value) {
-        this.setVignetteApply();
+        this.camera.script.get('vignette').fire('attr', 'offset', value);
     };
     Viewer.prototype.setVignetteDarkness = function (value) {
-        this.setVignetteApply();
-    };
-    Viewer.prototype.setVignetteApply = function () {
-        var enabled = this.observer.get('scripts.vignette.enabled');
-        this.camera.script.destroy('vignette');
-        if (enabled) {
-            this.camera.script.create('vignette', {
-                attributes: this.observer.get('scripts.vignette')
-            });
-        }
+        this.camera.script.get('vignette').fire('attr', 'darkness', value);
     };
     Viewer.prototype.setBokehEnabled = function (value) {
-        this.setBokehApply();
+        this.camera.script.get('bokeh').fire('state', value);
     };
     Viewer.prototype.setBokehMaxBlur = function (value) {
-        this.setBokehApply();
+        this.camera.script.get('bokeh').fire('attr', 'maxBlur', value);
     };
     Viewer.prototype.setBokehAperture = function (value) {
-        this.setBokehApply();
+        this.camera.script.get('bokeh').fire('attr', 'aperture', value);
     };
     Viewer.prototype.setBokehFocus = function (value) {
-        this.setBokehApply();
+        this.camera.script.get('bokeh').fire('attr', 'focus', value);
     };
-    Viewer.prototype.setBokehApply = function () {
-        var enabled = this.observer.get('scripts.bokeh.enabled');
-        this.camera.script.destroy('bokeh');
-        if (enabled) {
-            this.camera.script.create('bokeh', {
-                attributes: this.observer.get('scripts.bokeh')
-            });
-        }
+    Viewer.prototype.setSSAOEnabled = function (value) {
+        this.camera.script.get('ssao').fire('state', value);
+    };
+    Viewer.prototype.setSSAORadius = function (value) {
+        this.camera.script.get('ssao').fire('attr', 'radius', value);
+    };
+    Viewer.prototype.setSSAOSamples = function (value) {
+        this.camera.script.get('ssao').fire('attr', 'samples', value);
+    };
+    Viewer.prototype.setSSAOBrightness = function (value) {
+        this.camera.script.get('ssao').fire('attr', 'brightness', value);
+    };
+    Viewer.prototype.setSSAODownscale = function (value) {
+        this.camera.script.get('ssao').fire('attr', 'downscale', value);
     };
     //#endregion
     //#region Util
@@ -133797,6 +133786,7 @@ var observerData = {
     },
     show: {
         stats: false,
+        depth: false,
         fov: 45
     },
     lighting: {
@@ -133887,15 +133877,15 @@ var observerData = {
         },
         bokeh: {
             enabled: true,
-            maxBlur: 0.02,
-            aperture: 0.15,
+            maxBlur: 0.003,
+            aperture: 0.1,
             focus: 1,
         },
         ssao: {
             enabled: true,
             radius: 5,
             samples: 16,
-            brightness: 0,
+            brightness: 0.3,
             downscale: 1
         },
         vignette: {
