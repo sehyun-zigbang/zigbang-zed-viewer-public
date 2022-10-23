@@ -129248,7 +129248,7 @@ var CameraPanel = /** @class */ (function (_super) {
     CameraPanel.prototype.render = function () {
         var props = this.props;
         return (React.createElement(Panel$1, { headerText: 'CAMERA', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
-            React.createElement(Slider, { label: 'Fov', precision: 0, min: 35, max: 150, value: props.observerData.show.fov, setProperty: function (value) { return props.setProperty('show.fov', value); } }),
+            React.createElement(Slider, { label: 'Fov', precision: 0, min: 20, max: 70, value: props.observerData.show.fov, setProperty: function (value) { return props.setProperty('show.fov', value); } }),
             React.createElement(Select, { label: 'Tonemap', type: 'string', options: ['Linear', 'Filmic', 'Hejl', 'ACES'].map(function (v) { return ({ v: v, t: v }); }), value: props.observerData.lighting.tonemapping, setProperty: function (value) { return props.setProperty('lighting.tonemapping', value); } }),
             React.createElement(Toggle, { label: 'FXAA', value: props.observerData.scripts.fxaa.enabled, setProperty: function (value) { return props.setProperty('scripts.fxaa.enabled', value); } })));
     };
@@ -132746,51 +132746,6 @@ var Viewer = /** @class */ (function () {
         this.init_dropHandler();
         this.init_object();
         this.init_stats();
-        this.observer.on('canvasResized', function () {
-            _this.resizeCanvas();
-        });
-        this.resizeCanvas();
-        this.app.start();
-    }
-    Viewer.prototype.init_app = function () {
-        var canvas = this.canvas;
-        // create the application
-        var app = this.app = new Application(canvas, {
-            mouse: new Mouse(canvas),
-            touch: new TouchDevice(canvas),
-            graphicsDeviceOptions: {
-                preferWebGl2: true,
-                alpha: true,
-                // the following aren't needed since we're rendering to an offscreen render target
-                // and would only result in extra memory usage.
-                antialias: true,
-                depth: true,
-                //preserveDrawingBuffer: true
-            }
-        });
-        app.autoRender = false;
-        this.prevCameraMat = new Mat4();
-    };
-    Viewer.prototype.init_camera = function () {
-        var _this = this;
-        var app = this.app;
-        var observer = this.observer;
-        // Create Camera Entity
-        var camera = this.camera = new Entity("Camera");
-        camera.addComponent("camera", {
-            fov: 45,
-            frustumCulling: true,
-            clearColor: new Color(0, 0, 0, 0)
-        });
-        camera.camera.requestSceneColorMap(true);
-        camera.camera.requestSceneDepthMap(true);
-        // Create OrbitCamera Component
-        this.orbitCamera = new OrbitCamera(camera, 0.25);
-        this.orbitCameraInputMouse = new OrbitCameraInputMouse(app, this.orbitCamera);
-        this.orbitCameraInputTouch = new OrbitCameraInputTouch(app, this.orbitCamera);
-        this.orbitCamera.focalPoint.snapto(new Vec3(0, 1, 0));
-        // Add 
-        this.app.root.addChild(camera);
         // Create Post-Process Component
         var assets = {
             "fxaa": new Asset('fxaa', 'script', { url: getAssetPath('effect/fxaa.js') }),
@@ -132801,8 +132756,9 @@ var Viewer = /** @class */ (function () {
             'bokeh': new Asset('bokeh', 'script', { url: getAssetPath('effect/bokeh.js') }),
             'ssao': new Asset('ssao', 'script', { url: getAssetPath('effect/ssao.js') })
         };
-        var assetListLoader = new AssetListLoader(Object.values(assets), app.assets);
+        var assetListLoader = new AssetListLoader(Object.values(assets), this.app.assets);
         assetListLoader.load(function () {
+            var camera = _this.camera;
             observer.set('show.postprocess', observer.get('show.postprocess'));
             camera.addComponent("script");
             Object.keys(observer.get('scripts')).forEach(function (key) {
@@ -132844,10 +132800,53 @@ var Viewer = /** @class */ (function () {
             // register control events
             Object.keys(controlEvents).forEach(function (e) {
                 observer.on("".concat(e, ":set"), controlEvents[e]);
-                //observer.set(e, observer.get(e), false, false, true);
             });
-            _this.renderNextFrame();
+            observer.on('canvasResized', function () {
+                _this.resizeCanvas();
+            });
+            _this.resizeCanvas();
+            _this.app.start();
         });
+    }
+    Viewer.prototype.init_app = function () {
+        var canvas = this.canvas;
+        // create the application
+        var app = this.app = new Application(canvas, {
+            mouse: new Mouse(canvas),
+            touch: new TouchDevice(canvas),
+            graphicsDeviceOptions: {
+                preferWebGl2: true,
+                alpha: true,
+                // the following aren't needed since we're rendering to an offscreen render target
+                // and would only result in extra memory usage.
+                antialias: true,
+                depth: true,
+                //preserveDrawingBuffer: true
+            }
+        });
+        app.autoRender = false;
+        this.prevCameraMat = new Mat4();
+    };
+    Viewer.prototype.init_camera = function () {
+        var _this = this;
+        var app = this.app;
+        var observer = this.observer;
+        // Create Camera Entity
+        var camera = this.camera = new Entity("Camera");
+        camera.addComponent("camera", {
+            fov: 45,
+            frustumCulling: true,
+            clearColor: new Color(0, 0, 0, 0)
+        });
+        //camera.camera.requestSceneColorMap(true);
+        camera.camera.requestSceneDepthMap(true);
+        // Create OrbitCamera Component
+        this.orbitCamera = new OrbitCamera(camera, 0.25);
+        this.orbitCameraInputMouse = new OrbitCameraInputMouse(app, this.orbitCamera);
+        this.orbitCameraInputTouch = new OrbitCameraInputTouch(app, this.orbitCamera);
+        this.orbitCamera.focalPoint.snapto(new Vec3(0, 1, 0));
+        // Add 
+        this.app.root.addChild(camera);
         // store app things
         this.cameraFocusBBox = null;
         this.cameraPosition = null;
@@ -133037,6 +133036,141 @@ var Viewer = /** @class */ (function () {
             observer.set(e, observer.get(e), false, false, true);
         });
     };
+    Viewer.prototype.clearSkybox = function () {
+        this.app.scene.envAtlas = null;
+        this.app.scene.setSkybox(null);
+        this.skyboxLoaded = false;
+        this.renderNextFrame();
+    };
+    // initialize the faces and prefiltered lighting data from the given
+    // skybox texture, which is either a cubemap or equirect texture.
+    Viewer.prototype.initSkyboxFromTextureNew = function (env) {
+        var skybox = EnvLighting.generateSkyboxCubemap(env);
+        var lighting = EnvLighting.generateLightingSource(env);
+        // The second options parameter should not be necessary but the TS declarations require it for now
+        var envAtlas = EnvLighting.generateAtlas(lighting, {});
+        lighting.destroy();
+        this.app.scene.envAtlas = envAtlas;
+        this.app.scene.skybox = skybox;
+    };
+    // initialize the faces and prefiltered lighting data from the given
+    // skybox texture, which is either a cubemap or equirect texture.
+    Viewer.prototype.initSkyboxFromTexture = function (skybox) {
+        if (EnvLighting) {
+            this.renderNextFrame();
+            return this.initSkyboxFromTextureNew(skybox);
+        }
+        var app = this.app;
+        var device = app.graphicsDevice;
+        var createCubemap = function (size) {
+            return new Texture(device, {
+                name: "skyboxFaces-".concat(size),
+                cubemap: true,
+                width: size,
+                height: size,
+                type: TEXTURETYPE_RGBM,
+                addressU: ADDRESS_CLAMP_TO_EDGE,
+                addressV: ADDRESS_CLAMP_TO_EDGE,
+                fixCubemapSeams: true,
+                mipmaps: false
+            });
+        };
+        var cubemaps = [];
+        cubemaps.push(EnvLighting.generateSkyboxCubemap(skybox));
+        var lightingSource = EnvLighting.generateLightingSource(skybox);
+        // create top level
+        var top = createCubemap(128);
+        reprojectTexture(lightingSource, top, {
+            numSamples: 1
+        });
+        cubemaps.push(top);
+        // generate prefiltered lighting data
+        var sizes = [128, 64, 32, 16, 8, 4];
+        var specPower = [1, 512, 128, 32, 8, 2];
+        for (var i = 1; i < sizes.length; ++i) {
+            var level = createCubemap(sizes[i]);
+            reprojectTexture(lightingSource, level, {
+                numSamples: 1024,
+                specularPower: specPower[i],
+                distribution: 'ggx'
+            });
+            cubemaps.push(level);
+        }
+        lightingSource.destroy();
+        // assign the textures to the scene
+        app.scene.setSkybox(cubemaps);
+        this.renderNextFrame();
+    };
+    // load the image files into the skybox. this function supports loading a single equirectangular
+    // skybox image or 6 cubemap faces.
+    Viewer.prototype.loadSkybox = function (files) {
+        var _this = this;
+        var app = this.app;
+        if (files.length !== 6) {
+            // load equirectangular skybox
+            var textureAsset_1 = new Asset('skybox_equi', 'texture', {
+                url: files[0].url,
+                filename: files[0].filename
+            });
+            textureAsset_1.ready(function () {
+                var texture = textureAsset_1.resource;
+                if (texture.type === TEXTURETYPE_DEFAULT && texture.format === PIXELFORMAT_R8_G8_B8_A8) {
+                    // assume RGBA data (pngs) are RGBM
+                    texture.type = TEXTURETYPE_RGBM;
+                }
+                _this.initSkyboxFromTexture(texture);
+            });
+            app.assets.add(textureAsset_1);
+            app.assets.load(textureAsset_1);
+        }
+        else {
+            // sort files into the correct order based on filename
+            var names_1 = [
+                ['posx', 'negx', 'posy', 'negy', 'posz', 'negz'],
+                ['px', 'nx', 'py', 'ny', 'pz', 'nz'],
+                ['right', 'left', 'up', 'down', 'front', 'back'],
+                ['right', 'left', 'top', 'bottom', 'forward', 'backward'],
+                ['0', '1', '2', '3', '4', '5']
+            ];
+            var getOrder_1 = function (filename) {
+                var fn = filename.toLowerCase();
+                for (var i = 0; i < names_1.length; ++i) {
+                    var nameList = names_1[i];
+                    for (var j = 0; j < nameList.length; ++j) {
+                        if (fn.indexOf(nameList[j] + '.') !== -1) {
+                            return j;
+                        }
+                    }
+                }
+                return 0;
+            };
+            var sortPred = function (first, second) {
+                var firstOrder = getOrder_1(first.filename);
+                var secondOrder = getOrder_1(second.filename);
+                return firstOrder < secondOrder ? -1 : (secondOrder < firstOrder ? 1 : 0);
+            };
+            files.sort(sortPred);
+            // construct an asset for each cubemap face
+            var faceAssets = files.map(function (file, index) {
+                var faceAsset = new Asset('skybox_face' + index, 'texture', file);
+                app.assets.add(faceAsset);
+                app.assets.load(faceAsset);
+                return faceAsset;
+            });
+            // construct the cubemap asset
+            var cubemapAsset_1 = new Asset('skybox_cubemap', 'cubemap', null, {
+                textures: faceAssets.map(function (faceAsset) { return faceAsset.id; })
+            });
+            cubemapAsset_1.loadFaces = true;
+            cubemapAsset_1.on('load', function () {
+                _this.initSkyboxFromTexture(cubemapAsset_1.resource);
+            });
+            app.assets.add(cubemapAsset_1);
+            app.assets.load(cubemapAsset_1);
+        }
+        this.skyboxLoaded = true;
+        this.renderNextFrame();
+    };
     Viewer.prototype.init_dropHandler = function () {
         var _this = this;
         var app = this.app;
@@ -133136,7 +133270,7 @@ var Viewer = /** @class */ (function () {
     Viewer.prototype.resizeCanvas = function () {
         var device = this.app.graphicsDevice;
         var canvasSize = this.getCanvasSize();
-        device.maxPixelRatio = window.devicePixelRatio;
+        device.maxPixelRatio = 1; //window.devicePixelRatio;
         this.app.resizeCanvas(canvasSize.width, canvasSize.height);
         this.renderNextFrame();
     };
@@ -133307,15 +133441,15 @@ var Viewer = /** @class */ (function () {
                 return url.filename === path.normalize(gltfImage.uri || "");
             });
             if (u) {
-                var textureAsset_1 = new Asset(u.filename, 'texture', {
+                var textureAsset_2 = new Asset(u.filename, 'texture', {
                     url: u.url,
                     filename: u.filename
                 });
-                textureAsset_1.on('load', function () {
-                    continuation(null, textureAsset_1);
+                textureAsset_2.on('load', function () {
+                    continuation(null, textureAsset_2);
                 });
-                this.app.assets.add(textureAsset_1);
-                this.app.assets.load(textureAsset_1);
+                this.app.assets.add(textureAsset_2);
+                this.app.assets.load(textureAsset_2);
             }
             else {
                 continuation(null, null);
@@ -133421,143 +133555,6 @@ var Viewer = /** @class */ (function () {
         }
         // return true if a model/scene was loaded and false otherwise
         return hasModelFilename;
-    };
-    //#endregion
-    //#region Load Skybox
-    Viewer.prototype.clearSkybox = function () {
-        this.app.scene.envAtlas = null;
-        this.app.scene.setSkybox(null);
-        this.skyboxLoaded = false;
-        this.renderNextFrame();
-    };
-    // initialize the faces and prefiltered lighting data from the given
-    // skybox texture, which is either a cubemap or equirect texture.
-    Viewer.prototype.initSkyboxFromTextureNew = function (env) {
-        var skybox = EnvLighting.generateSkyboxCubemap(env);
-        var lighting = EnvLighting.generateLightingSource(env);
-        // The second options parameter should not be necessary but the TS declarations require it for now
-        var envAtlas = EnvLighting.generateAtlas(lighting, {});
-        lighting.destroy();
-        this.app.scene.envAtlas = envAtlas;
-        this.app.scene.skybox = skybox;
-    };
-    // initialize the faces and prefiltered lighting data from the given
-    // skybox texture, which is either a cubemap or equirect texture.
-    Viewer.prototype.initSkyboxFromTexture = function (skybox) {
-        if (EnvLighting) {
-            this.renderNextFrame();
-            return this.initSkyboxFromTextureNew(skybox);
-        }
-        var app = this.app;
-        var device = app.graphicsDevice;
-        var createCubemap = function (size) {
-            return new Texture(device, {
-                name: "skyboxFaces-".concat(size),
-                cubemap: true,
-                width: size,
-                height: size,
-                type: TEXTURETYPE_RGBM,
-                addressU: ADDRESS_CLAMP_TO_EDGE,
-                addressV: ADDRESS_CLAMP_TO_EDGE,
-                fixCubemapSeams: true,
-                mipmaps: false
-            });
-        };
-        var cubemaps = [];
-        cubemaps.push(EnvLighting.generateSkyboxCubemap(skybox));
-        var lightingSource = EnvLighting.generateLightingSource(skybox);
-        // create top level
-        var top = createCubemap(128);
-        reprojectTexture(lightingSource, top, {
-            numSamples: 1
-        });
-        cubemaps.push(top);
-        // generate prefiltered lighting data
-        var sizes = [128, 64, 32, 16, 8, 4];
-        var specPower = [1, 512, 128, 32, 8, 2];
-        for (var i = 1; i < sizes.length; ++i) {
-            var level = createCubemap(sizes[i]);
-            reprojectTexture(lightingSource, level, {
-                numSamples: 1024,
-                specularPower: specPower[i],
-                distribution: 'ggx'
-            });
-            cubemaps.push(level);
-        }
-        lightingSource.destroy();
-        // assign the textures to the scene
-        app.scene.setSkybox(cubemaps);
-        this.renderNextFrame();
-    };
-    // load the image files into the skybox. this function supports loading a single equirectangular
-    // skybox image or 6 cubemap faces.
-    Viewer.prototype.loadSkybox = function (files) {
-        var _this = this;
-        var app = this.app;
-        if (files.length !== 6) {
-            // load equirectangular skybox
-            var textureAsset_2 = new Asset('skybox_equi', 'texture', {
-                url: files[0].url,
-                filename: files[0].filename
-            });
-            textureAsset_2.ready(function () {
-                var texture = textureAsset_2.resource;
-                if (texture.type === TEXTURETYPE_DEFAULT && texture.format === PIXELFORMAT_R8_G8_B8_A8) {
-                    // assume RGBA data (pngs) are RGBM
-                    texture.type = TEXTURETYPE_RGBM;
-                }
-                _this.initSkyboxFromTexture(texture);
-            });
-            app.assets.add(textureAsset_2);
-            app.assets.load(textureAsset_2);
-        }
-        else {
-            // sort files into the correct order based on filename
-            var names_1 = [
-                ['posx', 'negx', 'posy', 'negy', 'posz', 'negz'],
-                ['px', 'nx', 'py', 'ny', 'pz', 'nz'],
-                ['right', 'left', 'up', 'down', 'front', 'back'],
-                ['right', 'left', 'top', 'bottom', 'forward', 'backward'],
-                ['0', '1', '2', '3', '4', '5']
-            ];
-            var getOrder_1 = function (filename) {
-                var fn = filename.toLowerCase();
-                for (var i = 0; i < names_1.length; ++i) {
-                    var nameList = names_1[i];
-                    for (var j = 0; j < nameList.length; ++j) {
-                        if (fn.indexOf(nameList[j] + '.') !== -1) {
-                            return j;
-                        }
-                    }
-                }
-                return 0;
-            };
-            var sortPred = function (first, second) {
-                var firstOrder = getOrder_1(first.filename);
-                var secondOrder = getOrder_1(second.filename);
-                return firstOrder < secondOrder ? -1 : (secondOrder < firstOrder ? 1 : 0);
-            };
-            files.sort(sortPred);
-            // construct an asset for each cubemap face
-            var faceAssets = files.map(function (file, index) {
-                var faceAsset = new Asset('skybox_face' + index, 'texture', file);
-                app.assets.add(faceAsset);
-                app.assets.load(faceAsset);
-                return faceAsset;
-            });
-            // construct the cubemap asset
-            var cubemapAsset_1 = new Asset('skybox_cubemap', 'cubemap', null, {
-                textures: faceAssets.map(function (faceAsset) { return faceAsset.id; })
-            });
-            cubemapAsset_1.loadFaces = true;
-            cubemapAsset_1.on('load', function () {
-                _this.initSkyboxFromTexture(cubemapAsset_1.resource);
-            });
-            app.assets.add(cubemapAsset_1);
-            app.assets.load(cubemapAsset_1);
-        }
-        this.skyboxLoaded = true;
-        this.renderNextFrame();
     };
     //#endregion
     //#region calcBoundingBox
@@ -133891,7 +133888,7 @@ var observerData = {
     show: {
         stats: false,
         depth: false,
-        fov: 45,
+        fov: 35,
         postprocess: true,
     },
     lighting: {
