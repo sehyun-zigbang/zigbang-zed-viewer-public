@@ -133186,6 +133186,7 @@ var Viewer = /** @class */ (function () {
             this.observer.set('scene.loadTime', "".concat(Date.now() - this.loadTimestamp, " ms"));
             this.loadTimestamp = null;
             this.observer.set('spinner', false);
+            this.renderNextFrame();
         }
     };
     //#endregion
@@ -133429,6 +133430,7 @@ var Viewer = /** @class */ (function () {
         this.app.scene.envAtlas = null;
         this.app.scene.setSkybox(null);
         this.skyboxLoaded = false;
+        this.renderNextFrame();
     };
     // initialize the faces and prefiltered lighting data from the given
     // skybox texture, which is either a cubemap or equirect texture.
@@ -133445,6 +133447,7 @@ var Viewer = /** @class */ (function () {
     // skybox texture, which is either a cubemap or equirect texture.
     Viewer.prototype.initSkyboxFromTexture = function (skybox) {
         if (EnvLighting) {
+            this.renderNextFrame();
             return this.initSkyboxFromTextureNew(skybox);
         }
         var app = this.app;
@@ -133486,6 +133489,7 @@ var Viewer = /** @class */ (function () {
         lightingSource.destroy();
         // assign the textures to the scene
         app.scene.setSkybox(cubemaps);
+        this.renderNextFrame();
     };
     // load the image files into the skybox. this function supports loading a single equirectangular
     // skybox image or 6 cubemap faces.
@@ -133555,6 +133559,7 @@ var Viewer = /** @class */ (function () {
             app.assets.load(cubemapAsset_1);
         }
         this.skyboxLoaded = true;
+        this.renderNextFrame();
     };
     //#endregion
     //#region calcBoundingBox
@@ -133730,7 +133735,6 @@ var Viewer = /** @class */ (function () {
         this.renderNextFrame();
     };
     Viewer.prototype.setPostProcessEnabled = function (value) {
-        console.log('a');
         this.setBloomEnabled(value);
         this.setBokehEnabled(value);
         this.setSSAOEnabled(value);
@@ -133744,7 +133748,6 @@ var Viewer = /** @class */ (function () {
         this.renderNextFrame();
     };
     Viewer.prototype.setBloomEnabled = function (value) {
-        console.log('b');
         this.camera.script.get('bloom').fire('state', value && this.observer.get("show.postprocess"));
         this.renderNextFrame();
     };
