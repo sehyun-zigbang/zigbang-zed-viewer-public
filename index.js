@@ -133270,7 +133270,7 @@ var Viewer = /** @class */ (function () {
     Viewer.prototype.resizeCanvas = function () {
         var device = this.app.graphicsDevice;
         var canvasSize = this.getCanvasSize();
-        device.maxPixelRatio = 1; //window.devicePixelRatio;
+        device.maxPixelRatio = window.devicePixelRatio; //1;//window.devicePixelRatio;
         this.app.resizeCanvas(canvasSize.width, canvasSize.height);
         this.renderNextFrame();
     };
