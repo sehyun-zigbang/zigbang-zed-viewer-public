@@ -129420,6 +129420,7 @@ var ShowPanel = /** @class */ (function (_super) {
     ShowPanel.prototype.render = function () {
         var props = this.props;
         return (React.createElement(Panel$1, { headerText: 'DEBUG', id: 'scene-panel', flexShrink: 0, flexGrow: 0, collapsible: true, collapsed: true },
+            React.createElement(Toggle, { label: 'Grid', value: props.showData.grid, setProperty: function (value) { return props.setProperty('show.grid', value); } }),
             React.createElement(Toggle, { label: 'Stats', value: props.showData.stats, setProperty: function (value) { return props.setProperty('show.stats', value); } }),
             React.createElement(Toggle, { label: 'Depth', value: props.showData.depth, setProperty: function (value) { return props.setProperty('show.depth', value); } })));
     };
@@ -132840,7 +132841,7 @@ var Viewer = /** @class */ (function () {
                 // and would only result in extra memory usage.
                 antialias: true,
                 depth: true,
-                //preserveDrawingBuffer: true
+                preserveDrawingBuffer: false
             }
         });
         app.autoRender = false;
@@ -132910,6 +132911,8 @@ var Viewer = /** @class */ (function () {
             aed.z = distance;
             this.orbitCamera.azimElevDistance.snapto(aed);
         }
+        this.sceneBounds = bbox;
+        this.observer.set('scene.bounds', bbox);
         this.orbitCamera.setBounds(bbox);
         this.orbitCamera.focalPoint.snapto(bbox.center);
         camera.nearClip = distance / 100;
@@ -133270,6 +133273,8 @@ var Viewer = /** @class */ (function () {
         this.miniStats.enabled = observer.get('show.stats');
         var controlEvents = {
             'show.stats': this.setStats.bind(this),
+            'show.grid': this.setGrid.bind(this),
+            'show.depth': this.setDepth.bind(this),
         };
         // register control events
         Object.keys(controlEvents).forEach(function (e) {
@@ -133300,12 +133305,6 @@ var Viewer = /** @class */ (function () {
         var _a;
         // update the orbit camera
         this.orbitCamera.update(deltaTime);
-        if ((_a = this.camera.script) === null || _a === void 0 ? void 0 : _a.has('bokeh')) {
-            var fPoint = this.orbitCamera.focalPoint.snaptoPoint.clone();
-            var cPoint = this.orbitCamera.cameraNode.getPosition();
-            var focus = -fPoint.sub(cPoint).length();
-            this.setBokehFocus(focus);
-        }
         var maxdiff = function (a, b) {
             var result = 0;
             for (var i = 0; i < 16; ++i) {
@@ -133317,12 +133316,49 @@ var Viewer = /** @class */ (function () {
         var cameraWorldTransform = this.camera.getWorldTransform();
         if (maxdiff(cameraWorldTransform, this.prevCameraMat) > 1e-04) {
             this.prevCameraMat.copy(cameraWorldTransform);
+            var current = this.app.graphicsDevice.maxPixelRatio;
+            this.app.graphicsDevice.maxPixelRatio = Math.max(1, current - 0.1);
             this.renderNextFrame();
-            if (this.observer.get('show.depth')) {
-                if (this.observer.get('scripts.bokeh.enabled') || this.observer.get('scripts.ssao.enabled')) {
-                    // @ts-ignore engine-tsd
-                    this.app.drawDepthTexture(0.7, -0.7, 0.5, 0.5);
-                }
+            if (this.observer.get('scripts.bokeh.enabled') && ((_a = this.camera.script) === null || _a === void 0 ? void 0 : _a.has('bokeh'))) {
+                var fPoint = this.orbitCamera.focalPoint.snaptoPoint.clone();
+                var cPoint = this.orbitCamera.cameraNode.getPosition();
+                var focus = -fPoint.sub(cPoint).length();
+                this.setBokehFocus(focus);
+            }
+        }
+        else {
+            var maxRatio = window.devicePixelRatio;
+            var current = this.app.graphicsDevice.maxPixelRatio;
+            if (current != maxRatio) {
+                this.app.graphicsDevice.maxPixelRatio = Math.min(maxRatio, current + 0.1);
+                this.renderNextFrame();
+            }
+        }
+        if (this.observer.get('show.stats')) {
+            this.renderNextFrame();
+        }
+        if (this.observer.get('show.depth')) {
+            if (this.observer.get('scripts.bokeh.enabled') || this.observer.get('scripts.ssao.enabled')) {
+                // @ts-ignore engine-tsd
+                this.app.drawDepthTexture(0.7, -0.7, 0.5, 0.5);
+            }
+        }
+        if (this.sceneBounds && this.observer.get('show.grid')) {
+            var color1 = Color.BLACK;
+            var color2 = Color.WHITE;
+            var spacing = 100; // Math.pow(10, Math.floor(Math.log10(this.sceneBounds.halfExtents.length())));
+            var v0 = new Vec3(0, -0.2, 0);
+            var v1 = new Vec3(0, -0.2, 0);
+            var numGrids = 10;
+            var a = numGrids * spacing;
+            for (var x = -numGrids; x < numGrids + 1; ++x) {
+                var b = x * spacing;
+                v0.set(-a, -0.2, b);
+                v1.set(a, -0.2, b);
+                this.app.drawLine(v0, v1, b === 0 ? color1 : color2);
+                v0.set(b, -0.2, -a);
+                v1.set(b, -0.2, a);
+                this.app.drawLine(v0, v1, b === 0 ? color1 : color2);
             }
         }
     };
@@ -133621,6 +133657,12 @@ var Viewer = /** @class */ (function () {
         this.miniStats.enabled = show;
         this.renderNextFrame();
     };
+    Viewer.prototype.setGrid = function (show) {
+        this.renderNextFrame();
+    };
+    Viewer.prototype.setDepth = function (show) {
+        this.renderNextFrame();
+    };
     Viewer.prototype.setFov = function (fov) {
         this.camera.camera.fov = fov;
         this.renderNextFrame();
@@ -133756,9 +133798,9 @@ var Viewer = /** @class */ (function () {
         this.camera.script.get('huesaturation').fire('state', false);
         this.camera.script.get('bokeh').fire('state', false);
         this.camera.script.get('vignette').fire('state', false);
+        if (FXAA != false)
+            this.camera.script.get('fxaa').fire('state', FXAA);
         if (this.observer.get("show.postprocess")) {
-            if (FXAA != false)
-                this.camera.script.get('fxaa').fire('state', FXAA);
             if (SSAO != false)
                 this.camera.script.get('ssao').fire('state', SSAO);
             if (Bloom != false)
@@ -133775,7 +133817,7 @@ var Viewer = /** @class */ (function () {
         this.renderNextFrame();
     };
     Viewer.prototype.setPostProcessEnabled = function (value) {
-        this.camera.script.get('fxaa').fire('state', value ? this.observer.get("scripts.fxaa.enabled") : false);
+        //this.camera.script.get('fxaa').fire('state', value ? this.observer.get("scripts.fxaa.enabled") : false);
         this.camera.script.get('ssao').fire('state', value ? this.observer.get("scripts.ssao.enabled") : false);
         this.camera.script.get('bloom').fire('state', value ? this.observer.get("scripts.bloom.enabled") : false);
         this.camera.script.get('brightnesscontrast').fire('state', value ? this.observer.get("scripts.brightnesscontrast.enabled") : false);
@@ -133912,10 +133954,12 @@ var Viewer = /** @class */ (function () {
     Viewer.prototype.handleUrlParams = function () {
         if (location.search) {
             var s = location.search.substring(1).split("=");
-            s[0];
-            var values = (s[1] && decodeURIComponent(s[1])).split('/');
-            if (values.length == 3)
-                this.LoadModel(values[0], values[1], values[2]);
+            var api = s[0];
+            if (api.toLowerCase() == 'load') {
+                var values = (s[1] && decodeURIComponent(s[1])).split('/');
+                if (values.length == 3)
+                    this.LoadModel(values[0], values[1], values[2]);
+            }
         }
     };
     Viewer.prototype.LoadModel = function (danjiId, roomTypeId, level) {
@@ -133948,6 +133992,7 @@ var observerData = {
     show: {
         stats: false,
         depth: false,
+        grid: true,
         fov: 35,
         postprocess: true,
     },
