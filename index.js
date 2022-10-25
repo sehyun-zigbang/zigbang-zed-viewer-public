@@ -132912,7 +132912,8 @@ var Viewer = /** @class */ (function () {
             this.orbitCamera.azimElevDistance.snapto(aed);
         }
         this.sceneBounds = bbox;
-        this.observer.set('scene.bounds', bbox);
+        var v = new Vec3(Math.round((this.sceneBounds.halfExtents.x * 2) * 100) / 100, Math.round((this.sceneBounds.halfExtents.y * 2) * 100) / 100, Math.round((this.sceneBounds.halfExtents.z * 2) * 100) / 100);
+        this.observer.set('scene.bounds', v.toString());
         this.orbitCamera.setBounds(bbox);
         this.orbitCamera.focalPoint.snapto(bbox.center);
         camera.nearClip = distance / 100;
@@ -133298,13 +133299,13 @@ var Viewer = /** @class */ (function () {
         this.app.resizeCanvas(canvasSize.width, canvasSize.height);
         this.renderNextFrame();
     };
-    //#endregion
-    //-----------------------------------
-    //#region Life Cycle
     Viewer.prototype.update = function (deltaTime) {
         var _a;
         // update the orbit camera
         this.orbitCamera.update(deltaTime);
+        var showStats = this.observer.get('show.stats');
+        var showDepth = this.observer.get('show.depth');
+        var showGrid = this.observer.get('show.grid');
         var maxdiff = function (a, b) {
             var result = 0;
             for (var i = 0; i < 16; ++i) {
@@ -133316,8 +133317,9 @@ var Viewer = /** @class */ (function () {
         var cameraWorldTransform = this.camera.getWorldTransform();
         if (maxdiff(cameraWorldTransform, this.prevCameraMat) > 1e-04) {
             this.prevCameraMat.copy(cameraWorldTransform);
-            var current = this.app.graphicsDevice.maxPixelRatio;
-            this.app.graphicsDevice.maxPixelRatio = Math.max(1, current - 0.1);
+            //const current = this.app.graphicsDevice.maxPixelRatio;
+            this.app.graphicsDevice.maxPixelRatio = 1;
+            this.moved = true;
             this.renderNextFrame();
             if (this.observer.get('scripts.bokeh.enabled') && ((_a = this.camera.script) === null || _a === void 0 ? void 0 : _a.has('bokeh'))) {
                 var fPoint = this.orbitCamera.focalPoint.snaptoPoint.clone();
@@ -133329,21 +133331,24 @@ var Viewer = /** @class */ (function () {
         else {
             var maxRatio = window.devicePixelRatio;
             var current = this.app.graphicsDevice.maxPixelRatio;
-            if (current != maxRatio) {
+            if (current != maxRatio && this.moved) {
                 this.app.graphicsDevice.maxPixelRatio = Math.min(maxRatio, current + 0.1);
                 this.renderNextFrame();
             }
-        }
-        if (this.observer.get('show.stats')) {
-            this.renderNextFrame();
-        }
-        if (this.observer.get('show.depth')) {
-            if (this.observer.get('scripts.bokeh.enabled') || this.observer.get('scripts.ssao.enabled')) {
-                // @ts-ignore engine-tsd
-                this.app.drawDepthTexture(0.7, -0.7, 0.5, 0.5);
+            else {
+                this.moved = false;
+                if (showStats)
+                    this.renderNextFrame();
+                else
+                    this.app.graphicsDevice.maxPixelRatio = 1;
             }
         }
-        if (this.sceneBounds && this.observer.get('show.grid')) {
+        if (showDepth) {
+            // @ts-ignore engine-tsd
+            this.app.drawDepthTexture(0.7, -0.7, 0.5, 0.5);
+            this.renderNextFrame();
+        }
+        if (this.sceneBounds && showGrid) {
             var color1 = Color.BLACK;
             var color2 = Color.WHITE;
             var spacing = 100; // Math.pow(10, Math.floor(Math.log10(this.sceneBounds.halfExtents.length())));
@@ -133620,6 +133625,13 @@ var Viewer = /** @class */ (function () {
             var components = entity.findComponents("render");
             for (var i = 0; i < components.length; i++) {
                 var render = components[i];
+                var name_1 = components[i].entity.name.toLowerCase();
+                if (name_1.includes('roof') || name_1.includes('wall') || name_1.includes('window') || name_1.includes('edge')) {
+                    render.castShadows = true;
+                }
+                else {
+                    render.castShadows = false;
+                }
                 if (render.meshInstances) {
                     for (var m = 0; m < render.meshInstances.length; m++) {
                         var meshInstance = render.meshInstances[m];
@@ -134008,12 +134020,12 @@ var observerData = {
             rotation: 0
         },
         mainLight: {
-            intencity: 0.6,
+            intencity: 1,
             color_r: 255,
             color_g: 255,
             color_b: 255,
-            rotation_x: 45,
-            rotation_y: 30,
+            rotation_x: 50,
+            rotation_y: 15,
             rotation_z: 0,
             shadow: true,
             shadowResolution: 2048,
