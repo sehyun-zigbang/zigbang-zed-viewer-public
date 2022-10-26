@@ -132911,6 +132911,7 @@ var Viewer = /** @class */ (function () {
         light.light.shadowDistance = distance * 2;
         this.cameraFocusBBox = bbox;
         this.prevCameraMat.copy(this.camera.getWorldTransform());
+        this.resizeCanvas();
         this.app.on('update', this.update, this);
     };
     Viewer.prototype.calcSceneBounds = function () {
