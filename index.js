@@ -132441,8 +132441,6 @@ var DropHandler = /** @class */ (function () {
 
 var SmoothedValue = /** @class */ (function () {
     function SmoothedValue(value, transitionTime, type) {
-        if (transitionTime === void 0) { transitionTime = 0.25; }
-        if (type === void 0) { type = 1; }
         this.value = value.clone();
         this.start = value.clone();
         this.target = value.clone();
@@ -132470,9 +132468,7 @@ var SmoothedValue = /** @class */ (function () {
                 var z = this.bounds.halfExtents.z + offset;
                 this.target.z = Math.max(Math.min(z, this.target.z), -z);
             }
-            else
-                (this.type == 2);
-            {
+            else if (this.type == 2) {
                 //this.target = pc.Vec3.ZERO;
                 this.target.y = Math.min(0, this.target.y);
                 this.target.z = Math.max(Math.min(this.target.z, this.maxDistance), 150);
