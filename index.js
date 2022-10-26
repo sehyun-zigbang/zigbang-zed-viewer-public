@@ -129197,15 +129197,6 @@ var toggleCollapsed = function () {
         leftPanel.classList.toggle('collapsed');
     }
 };
-var leftPanel;
-var openPanel = function () {
-    if (!leftPanel) {
-        leftPanel = document.getElementById('panel-left');
-    }
-    if (leftPanel && leftPanel.classList.contains('collapsed')) {
-        leftPanel.classList.remove('collapsed');
-    }
-};
 var ScenePanel = /** @class */ (function (_super) {
     __extends(ScenePanel, _super);
     function ScenePanel() {
@@ -129451,9 +129442,7 @@ var LeftPanel = /** @class */ (function (_super) {
         setTimeout(function () { return toggleCollapsed(); });
     };
     LeftPanel.prototype.componentDidUpdate = function (prevProps) {
-        if (!this.isMobile && prevProps.observerData.scene.nodes === '[]' && this.props.observerData.scene.nodes !== '[]') {
-            openPanel();
-        }
+        if (!this.isMobile && prevProps.observerData.scene.nodes === '[]' && this.props.observerData.scene.nodes !== '[]') ;
     };
     LeftPanel.prototype.render = function () {
         var scene = this.props.observerData.scene;
@@ -132486,6 +132475,7 @@ var SmoothedValue = /** @class */ (function () {
             {
                 //this.target = pc.Vec3.ZERO;
                 this.target.y = Math.min(0, this.target.y);
+                this.target.z = Math.max(Math.min(this.target.z, this.maxDistance), 150);
             }
         }
         if (this.timer < this.transitionTime) {
@@ -132501,8 +132491,9 @@ var SmoothedValue = /** @class */ (function () {
             this.value.copy(this.target);
         }
     };
-    SmoothedValue.prototype.setBounds = function (bounds) {
+    SmoothedValue.prototype.setBounds = function (bounds, distance) {
         this.bounds = bounds;
+        this.maxDistance = distance;
     };
     return SmoothedValue;
 }());
@@ -132545,10 +132536,11 @@ var OrbitCamera = /** @class */ (function () {
         this.cameraNode.setLocalPosition(vec);
         this.cameraNode.setLocalEulerAngles(aed.y, aed.x, 0);
     };
-    OrbitCamera.prototype.setBounds = function (bounds) {
+    OrbitCamera.prototype.init = function (bounds, distance) {
         this.sceneBounds = bounds;
-        this.focalPoint.setBounds(bounds);
-        this.azimElevDistance.setBounds(bounds);
+        this.maxDistance = distance;
+        this.focalPoint.setBounds(bounds, distance);
+        this.azimElevDistance.setBounds(bounds, distance);
     };
     return OrbitCamera;
 }());
@@ -132897,7 +132889,8 @@ var Viewer = /** @class */ (function () {
         }
         // calculate scene bounding box
         var radius = bbox.halfExtents.length();
-        var distance = (radius * 1.4) / Math.sin(0.5 * camera.fov * camera.aspectRatio * math$1.DEG_TO_RAD);
+        //const distance = (radius * 1.4) / Math.sin(0.5 * camera.fov * camera.aspectRatio  * pc.math.DEG_TO_RAD);
+        var distance = (radius * 1.1) / Math.sin(0.5 * camera.fov * math$1.DEG_TO_RAD) / camera.aspectRatio;
         if (this.cameraPosition) {
             var vec = bbox.center.clone().sub(this.cameraPosition);
             this.orbitCamera.vecToAzimElevDistance(vec, vec);
@@ -132906,22 +132899,23 @@ var Viewer = /** @class */ (function () {
         }
         else {
             var aed = this.orbitCamera.azimElevDistance.target.clone();
-            aed.x = 45;
-            aed.y = -45;
+            aed.x = 0;
+            aed.y = -30;
             aed.z = distance;
             this.orbitCamera.azimElevDistance.snapto(aed);
         }
         this.sceneBounds = bbox;
         var v = new Vec3(Math.round((this.sceneBounds.halfExtents.x * 2) * 100) / 100, Math.round((this.sceneBounds.halfExtents.y * 2) * 100) / 100, Math.round((this.sceneBounds.halfExtents.z * 2) * 100) / 100);
         this.observer.set('scene.bounds', v.toString());
-        this.orbitCamera.setBounds(bbox);
-        this.orbitCamera.focalPoint.snapto(bbox.center);
+        this.orbitCamera.init(bbox, distance * 1.3);
+        this.orbitCamera.focalPoint.snapto(Vec3.ZERO);
         camera.nearClip = distance / 100;
-        camera.farClip = distance * 10;
+        camera.farClip = distance * 2;
         var light = this.light;
         light.light.shadowDistance = distance * 2;
         this.cameraFocusBBox = bbox;
-        this.renderNextFrame();
+        this.prevCameraMat.copy(this.camera.getWorldTransform());
+        this.app.on('update', this.update, this);
     };
     Viewer.prototype.calcSceneBounds = function () {
         return this.meshInstances.length ?
@@ -133223,7 +133217,6 @@ var Viewer = /** @class */ (function () {
                 _this.observer.set('glbUrl', '');
             }
         });
-        app.on('update', this.update, this);
         app.on('frameend', this.onFrameend, this);
         // Set the canvas to fill the window and automatically change resolution to be the same as the canvas size
         var canvasSize = this.getCanvasSize();
@@ -133320,7 +133313,7 @@ var Viewer = /** @class */ (function () {
             //const current = this.app.graphicsDevice.maxPixelRatio;
             this.app.graphicsDevice.maxPixelRatio = 1;
             this.moved = true;
-            this.renderNextFrame();
+            this.renderOnlyNextFrame();
             if (this.observer.get('scripts.bokeh.enabled') && ((_a = this.camera.script) === null || _a === void 0 ? void 0 : _a.has('bokeh'))) {
                 var fPoint = this.orbitCamera.focalPoint.snaptoPoint.clone();
                 var cPoint = this.orbitCamera.cameraNode.getPosition();
@@ -133333,20 +133326,20 @@ var Viewer = /** @class */ (function () {
             var current = this.app.graphicsDevice.maxPixelRatio;
             if (current != maxRatio && this.moved) {
                 this.app.graphicsDevice.maxPixelRatio = Math.min(maxRatio, current + 0.1);
-                this.renderNextFrame();
+                this.renderOnlyNextFrame();
             }
             else {
                 this.moved = false;
                 if (showStats)
-                    this.renderNextFrame();
+                    this.renderOnlyNextFrame();
                 else
-                    this.app.graphicsDevice.maxPixelRatio = 1;
+                    this.app.graphicsDevice.maxPixelRatio = maxRatio;
             }
         }
         if (showDepth) {
             // @ts-ignore engine-tsd
             this.app.drawDepthTexture(0.7, -0.7, 0.5, 0.5);
-            this.renderNextFrame();
+            this.renderOnlyNextFrame();
         }
         if (this.sceneBounds && showGrid) {
             var color1 = Color.BLACK;
@@ -133378,7 +133371,6 @@ var Viewer = /** @class */ (function () {
             this.observer.set('scene.loadTime', "".concat(Date.now() - this.loadTimestamp, " ms"));
             this.loadTimestamp = null;
             this.observer.set('spinner', false);
-            this.renderNextFrame();
         }
     };
     //#endregion
@@ -133958,10 +133950,11 @@ var Viewer = /** @class */ (function () {
     // }
     //#endregion
     Viewer.prototype.renderNextFrame = function () {
+        this.app.graphicsDevice.maxPixelRatio = window.devicePixelRatio;
         this.app.renderNextFrame = true;
-        // if (this.multiframe) {
-        //     this.multiframe.moved();
-        // }
+    };
+    Viewer.prototype.renderOnlyNextFrame = function () {
+        this.app.renderNextFrame = true;
     };
     Viewer.prototype.handleUrlParams = function () {
         if (location.search) {
