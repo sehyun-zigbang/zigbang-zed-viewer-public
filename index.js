@@ -133320,8 +133320,9 @@ var Viewer = /** @class */ (function () {
         else {
             var maxRatio = window.devicePixelRatio;
             var current = this.app.graphicsDevice.maxPixelRatio;
+            var per = (maxRatio - 1) / 5;
             if (current != maxRatio && this.moved) {
-                this.app.graphicsDevice.maxPixelRatio = Math.min(maxRatio, current + 0.1);
+                this.app.graphicsDevice.maxPixelRatio = Math.min(maxRatio, current + per);
                 this.renderOnlyNextFrame();
             }
             else {
