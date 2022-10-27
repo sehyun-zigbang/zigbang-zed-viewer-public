@@ -133616,7 +133616,13 @@ var Viewer = /** @class */ (function () {
             for (var i = 0; i < components.length; i++) {
                 var render = components[i];
                 var name_1 = components[i].entity.name.toLowerCase();
-                if (name_1.includes('roof') || name_1.includes('wall') || name_1.includes('window') || name_1.includes('edge')) {
+                if (name_1.includes('wall')) {
+                    if (name_1.includes('deleted')) {
+                        render.enabled = false;
+                    }
+                    render.castShadows = true;
+                }
+                else if (name_1.includes('roof') || name_1.includes('window') || name_1.includes('edge')) {
                     render.castShadows = true;
                 }
                 else {
