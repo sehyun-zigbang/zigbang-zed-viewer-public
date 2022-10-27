@@ -134008,11 +134008,11 @@ var observerData = {
     lighting: {
         direct: 0.6,
         env: {
-            value: getAssetPath('./skybox/artist_workshop_2k.hdr'),
+            value: getAssetPath('./skybox/photo_studio_broadway_hall_2k.hdr'),
             options: null,
             default: null,
             skyboxMip: '0',
-            exposure: 0.2,
+            exposure: -1,
             backgroundColor: { r: 0.4, g: 0.45, b: 0.5 },
             rotation: 0
         },
@@ -134025,7 +134025,7 @@ var observerData = {
             rotation_y: 15,
             rotation_z: 0,
             shadow: true,
-            shadowResolution: 2048,
+            shadowResolution: 4096,
             shadowIntencity: 1
         },
         subLight: {
