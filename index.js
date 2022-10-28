@@ -129470,7 +129470,7 @@ var LoadControls = function (props) {
         var roomTypeId = document.getElementById('input-roomtypeId').ui.value;
         // @ts-ignore
         var level = document.getElementById('input-level').ui.value;
-        var asset_path = "https://raw.githubusercontent.com/sehyun-zigbang/zigbang-zed-viewer/feature/playcanvas-based/assets";
+        var asset_path = "https://raw.githubusercontent.com/sehyun-zigbang/zigbang-zed-assets/master";
         var model_path = "".concat(asset_path, "/glTF/").concat(danjiId, "/").concat(roomTypeId);
         var model_name = "".concat(danjiId, "_").concat(roomTypeId, "_").concat(level);
         var name_glTF = "".concat(model_name, ".gltf");
@@ -133972,7 +133972,7 @@ var Viewer = /** @class */ (function () {
         }
     };
     Viewer.prototype.LoadModel = function (danjiId, roomTypeId, level) {
-        var asset_path = "https://raw.githubusercontent.com/sehyun-zigbang/zigbang-zed-viewer/feature/playcanvas-based/assets";
+        var asset_path = "https://raw.githubusercontent.com/sehyun-zigbang/zigbang-zed-assets/master";
         var model_path = "".concat(asset_path, "/glTF/").concat(danjiId, "/").concat(roomTypeId);
         var model_name = "".concat(danjiId, "_").concat(roomTypeId, "_").concat(level);
         var name_glTF = "".concat(model_name, ".gltf");
